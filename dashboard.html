@@ -126,7 +126,7 @@ body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
   </div>
 
   <div class="grid">
-    <div class="card"><h2>转化漏斗 <small>打开 → 开始 → 完成 → 分享卡 → 深度解读</small></h2><div class="chart tall" id="funnelChart"></div></div>
+    <div class="card"><h2>转化漏斗 <small>打开 → 开始 → 完成 → 分享卡 → 深度解读 · 按去重用户</small></h2><div class="chart tall" id="funnelChart"></div></div>
     <div class="card"><h2>日趋势 <small>事件数 / 活跃用户</small></h2><div class="chart tall" id="trendChart"></div></div>
     <div class="card"><h2>人格分布 <small>test_completed</small></h2><div class="chart" id="personaChart"></div></div>
     <div class="card"><h2>地区分布</h2><div class="chart" id="countryChart"></div></div>
@@ -179,6 +179,10 @@ const THEME = {
 };
 
 const STATE = { days: 7, from: '', to: '', country: '', event: '', version: '' };
+function todayCn() {
+  /* 北京时间 YYYY-MM-DD(与 stats.js 的 +08:00 构造一致,避免 UTC 差一天) */
+  return new Date(Date.now() + 8 * 3600000).toISOString().slice(0, 10);
+}
 let lastData = null;
 const charts = {};
 function getChart(id) {
@@ -207,8 +211,10 @@ async function loadData() {
   }
   const params = new URLSearchParams();
   if (STATE.days > 0) params.set('days', STATE.days);
-  else params.set('from', '2020-01-01'); /* 「全部」:走 from/to 路径,避免服务端默认 30 天 */
-  if (STATE.from) { params.set('from', STATE.from); params.set('to', STATE.to || new Date().toISOString().slice(0,10)); }
+  /* 「全部」:from+to 必须成对,stats.js 才走全时段路径(只发 from 会落进默认 30 天) */
+  else { params.set('from', '2020-01-01'); params.set('to', todayCn()); }
+  /* to 缺省用北京时间,避免 UTC 日期在 0:00-8:00 时差一天 */
+  if (STATE.from) { params.set('from', STATE.from); params.set('to', STATE.to || todayCn()); }
   if (STATE.country) params.set('country', STATE.country);
   if (STATE.event) params.set('event', STATE.event);
   if (STATE.version) params.set('version', STATE.version);
@@ -257,34 +263,50 @@ function renderKpis(d, t) {
 }
 
 function funnelData(d) {
+  const first = (d && d[FUNNEL_STAGES[0]]) || 0;
   return FUNNEL_STAGES.map((s, i) => {
     const v = (d && d[s]) || 0;
     const prev = i > 0 ? (d && d[FUNNEL_STAGES[i-1]]) || 0 : null;
-    return { name: EVENT_LABELS[s] || s, value: v, rate: (prev && prev > 0) ? v / prev : null };
+    return {
+      name: EVENT_LABELS[s] || s, value: v,
+      rate: (prev && prev > 0) ? v / prev : null,        /* 较上一步 */
+      rate0: (first > 0) ? v / first : null              /* 较第一级 */
+    };
   });
 }
 
 function renderFunnel(d, t) {
   const chart = getChart('funnelChart');
-  const rows = funnelData(d).reverse(); // ECharts yAxis 自下而上
-  const labels = rows.map(r => r.name + (r.rate != null ? '  (' + (r.rate * 100).toFixed(0) + '%)' : ''));
+  const rows = funnelData(d); /* 业务顺序:打开 → 开始 → 完成 → 分享卡 → 深度解读 */
   chart.setOption({
     backgroundColor: 'transparent',
-    grid: { left: 8, right: 64, top: 8, bottom: 8, containLabel: true },
-    xAxis: { type: 'value', show: false },
-    yAxis: {
-      type: 'category', data: labels, inverse: true,
-      axisLine: { show: false }, axisTick: { show: false },
-      axisLabel: { color: t.ink2, fontSize: 12, width: 210, overflow: 'truncate' }
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: t.surface, borderColor: t.axis, textStyle: { color: t.ink, fontSize: 12 },
+      formatter: p => {
+        const r = p.data;
+        let s = '<b>' + esc(r.name) + '</b><br/>' + fmt(r.value) + ' 人';
+        if (r.rate != null) s += '<br/>较上一步: ' + (r.rate * 100).toFixed(0) + '%';
+        if (r.rate0 != null) s += '<br/>较打开网页: ' + (r.rate0 * 100).toFixed(0) + '%';
+        return s;
+      }
     },
     series: [{
-      type: 'bar', barWidth: 18,
+      type: 'funnel', sort: 'none', gap: 3, funnelAlign: 'center',
+      left: 10, right: 64, top: 10, bottom: 10,
+      minSize: '12%', maxSize: '100%',
+      label: {
+        show: true, position: 'inside', fontSize: 12, lineHeight: 17,
+        /* 浅色块用深字、深色块用白字,保证可读 */
+        color: p => p.dataIndex < 2 ? '#0b0b0b' : '#ffffff',
+        formatter: p => p.name + '\n' + fmt(p.value) + (p.data.rate != null ? '  ↓' + (p.data.rate * 100).toFixed(0) + '%' : '')
+      },
+      labelLine: { show: false },
+      itemStyle: { borderColor: t.surface, borderWidth: 2 },
       data: rows.map((r, i) => ({
-        value: r.value,
-        itemStyle: { color: t.ramp[Math.min(i, t.ramp.length - 1)], borderRadius: [0, 4, 4, 0] }
-      })),
-      label: { show: true, position: 'right', color: t.muted, fontSize: 12, formatter: p => fmt(p.value) },
-      tooltip: { formatter: p => p.name.split('  (')[0] + '<br/><b>' + fmt(p.value) + '</b> 次' }
+        name: r.name, value: r.value, rate: r.rate, rate0: r.rate0,
+        itemStyle: { color: t.ramp[Math.min(i, t.ramp.length - 1)] }
+      }))
     }]
   }, true);
 }
