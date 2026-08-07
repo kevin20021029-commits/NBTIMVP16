@@ -169,9 +169,24 @@ input[type="date"] {
 .rank { display:flex; flex-direction:column; gap:10px; padding-top:2px; }
 .rank-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; font-size:13px; }
 .rank-row .code { font-weight:600; letter-spacing:.03em; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.rank-row .track { height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden; }
-.rank-row .fill { height:100%; border-radius:99px; background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--purple))); transition:width .6s cubic-bezier(.4,0,.2,1); }
-.rank-row .val { text-align:right; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.rank-row .code small { color:var(--text-3); font-weight:400; margin-left:6px; }
+.rank-row .track {
+  height:14px; background:var(--surface-2); border-radius:99px; overflow:hidden;
+  border:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.rank-row .fill {
+  height:100%; border-radius:99px;
+  background:linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--purple)));
+  box-shadow:0 0 10px color-mix(in srgb, var(--accent) 45%, transparent);
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+}
+.rank-row .val { text-align:right; color:var(--text-2); font-variant-numeric:tabular-nums; min-width:3ch; }
+/* 人格 16 型:桌面 2 列紧凑网格 */
+.rank.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:9px 20px; }
+.rank-row.zero { opacity:.42; }
+.rank-row.zero .fill { box-shadow:none; background:var(--surface-2); }
+.rank-row.zero .val { color:var(--text-3); }
+@media (max-width:700px) { .rank.grid-2 { grid-template-columns:1fr; } }
 
 /* ============ 明细表 ============ */
 .tbl-wrap { max-height:420px; overflow:auto; border-radius:var(--r-md); }
@@ -326,7 +341,7 @@ body.embed .kpi-grid { padding-top:16px; }
 
 <div class="grid-sub">
   <div class="card">
-    <div class="card-hd"><h3>人格分布</h3><span class="hint">完成测试 · Top 8 + 其他</span></div>
+    <div class="card-hd"><h3>人格分布</h3><span class="hint">16 型全量 · 按去重用户</span></div>
     <div class="card-bd" id="personaBox"></div>
   </div>
   <div class="card">
@@ -381,6 +396,14 @@ const TAG_CLASS = {
 };
 const FUNNEL_STAGES = ['page_view','test_start','test_completed','share_card_generate_success','deep_dive_expand_click'];
 const FUNNEL_COLORS = ['#5B8CFF','#5B8CFF','#6F8CFF','#8A8CFA','#A78BFA'];
+/* 16 型人格:固定顺序(字母序)+ 中文名,未出现的显示为 0 */
+const PERSONA_NAMES = {
+  FGHC:'传教士', FGHP:'梦想家', FGTC:'赌神', FGTP:'梭哈战神',
+  FSHC:'佛系玩家', FSHP:'删App侠', FSTC:'打工人', FSTP:'恐慌割肉侠',
+  RGHC:'猎手', RGHP:'杠杆烈士', RGTC:'量化猎人', RGTP:'追高侠',
+  RSHC:'龟仙人', RSHP:'大冤种', RSTC:'精算师', RSTP:'焦虑盯盘侠'
+};
+const PERSONA_ORDER = Object.keys(PERSONA_NAMES).sort();
 const FLAGS = {HK:'🇭🇰',MO:'🇲🇴',TW:'🇹🇼',CN:'🇨🇳',US:'🇺🇸',SG:'🇸🇬',JP:'🇯🇵',KR:'🇰🇷',GB:'🇬🇧',AU:'🇦🇺',CA:'🇨🇦',DE:'🇩🇪',FR:'🇫🇷',MY:'🇲🇾',TH:'🇹🇭',VN:'🇻🇳',PH:'🇵🇭',ID:'🇮🇩',IN:'🇮🇳',NZ:'🇳🇿'};
 
 const THEME = {
@@ -571,12 +594,20 @@ function rankHtml(entries, opts) {
   }).join('') + '</div>';
 }
 function renderPersona(persona) {
-  let entries = Object.entries(persona || {}).sort((a,b) => b[1]-a[1]);
-  if (!entries.length) { $('personaBox').innerHTML = emptyHtml('暂无完成测试的数据'); return; }
-  let other = 0;
-  if (entries.length > 8) { other = entries.slice(8).reduce((s,e) => s+e[1], 0); entries = entries.slice(0,8); }
-  if (other > 0) entries.push(['其他', other]);
-  $('personaBox').innerHTML = rankHtml(entries, {});
+  const data = persona || {};
+  const total = Object.values(data).reduce((s, v) => s + v, 0);
+  if (!total) { $('personaBox').innerHTML = emptyHtml('暂无完成测试的数据'); return; }
+  const max = Math.max.apply(null, Object.values(data)) || 1;
+  /* 固定 16 型全量输出,未出现的显示 0(置灰) */
+  const html = '<div class="rank grid-2">' + PERSONA_ORDER.map(code => {
+    const n = data[code] || 0;
+    const zero = n === 0;
+    return '<div class="rank-row' + (zero ? ' zero' : '') + '">' +
+      '<span class="code" title="' + code + '">' + code + '<small>' + PERSONA_NAMES[code] + '</small></span>' +
+      '<span class="track"><span class="fill" style="width:' + (zero ? 0 : Math.max(n / max * 100, 4)) + '%"></span></span>' +
+      '<span class="val num">' + fmt(n) + '</span></div>';
+  }).join('') + '</div>';
+  $('personaBox').innerHTML = html;
 }
 function renderCountries(countries) {
   let entries = Object.entries(countries || {}).sort((a,b) => b[1]-a[1]);
