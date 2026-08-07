@@ -11,40 +11,48 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_KEY
 );
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Dash-Token',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS'
+const setCORS = (res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Dash-Token');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
 };
 
 module.exports = async function handler(req, res) {
-  if (req.method === 'OPTIONS') { res.set(CORS); return res.status(204).end(); }
-  if (req.method !== 'GET') return res.status(405).json({ ok: false });
+  if (req.method === 'OPTIONS') { setCORS(res); return res.status(204).end(); }
+  if (req.method !== 'GET') { setCORS(res); return res.status(405).json({ ok: false }); }
 
   const token = req.headers['x-dash-token'] || req.query.token || '';
   if (!process.env.DASH_TOKEN || token !== process.env.DASH_TOKEN) {
-    res.set(CORS);
+    setCORS(res);
     return res.status(401).json({ ok: false });
   }
 
   let t_from, t_to;
   if (req.query.from && req.query.to) {
+    /* from/to 格式校验:拒绝非法日期,避免拼进 timestamptz 后 RPC 抛错(500) */
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(req.query.from) || !/^\d{4}-\d{2}-\d{2}$/.test(req.query.to)) {
+      setCORS(res);
+      return res.status(400).json({ ok: false });
+    }
     t_from = req.query.from + 'T00:00:00+08:00';
     t_to = req.query.to + 'T23:59:59+08:00';
   } else {
     const days = Math.min(parseInt(req.query.days || '30', 10) || 30, 3650);
-    t_to = new Date().toISOString();
-    t_from = new Date(Date.now() - days * 86400000).toISOString();
+    /* days 路径同样按 +08:00 构造,与 RPC 的 Asia/Shanghai 分日一致(旧实现用 UTC,边界差 8 小时) */
+    const nowCn = new Date(Date.now() + 8 * 3600000);
+    t_to = nowCn.toISOString().slice(0, 10) + 'T23:59:59+08:00';
+    const fromCn = new Date(Date.now() - days * 86400000 + 8 * 3600000);
+    t_from = fromCn.toISOString().slice(0, 10) + 'T00:00:00+08:00';
   }
 
   /* mode=recent:最近事件明细(表格视图) */
   if (req.query.mode === 'recent') {
     const { data, error } = await supabase.rpc('dash_recent', { lim: Math.min(parseInt(req.query.n || '50', 10) || 50, 200) });
     if (error) {
-      res.set(CORS);
+      setCORS(res);
       return res.status(500).json({ ok: false, error: error.message });
     }
-    res.set(CORS);
+    setCORS(res);
     return res.json(data);
   }
 
@@ -57,9 +65,9 @@ module.exports = async function handler(req, res) {
   });
 
   if (error) {
-    res.set(CORS);
+    setCORS(res);
     return res.status(500).json({ ok: false, error: error.message });
   }
-  res.set(CORS);
+  setCORS(res);
   return res.json(data);
 };
