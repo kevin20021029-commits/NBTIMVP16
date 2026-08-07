@@ -313,7 +313,21 @@ function renderFunnel(d, t) {
 
 function renderTrend(daily, t) {
   const chart = getChart('trendChart');
-  const days = (daily || []).map(d => d.day);
+  let days = (daily || []).map(d => d.day);
+  /* 补零:填充范围内无事件的日期,避免趋势图只有单点/零散点而"看起来空白"。
+   * 仅当时间跨度 <= 90 天时补零(全时段等大跨度不补,避免生成几千个点)。 */
+  if (days.length && STATE.days > 0 && STATE.days <= 90) {
+    const map = Object.fromEntries((daily || []).map(d => [d.day, d]));
+    const span = [todayCn()];
+    for (let i = 1; i < STATE.days; i++) {
+      const d = new Date(Date.now() - i * 86400000 + 8 * 3600000);
+      span.push(d.toISOString().slice(0, 10));
+    }
+    span.sort();
+    days = span;
+    daily = days.map(day => map[day] || { day, events: 0, users: 0 });
+  }
+  const single = days.length === 1;
   chart.setOption({
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', backgroundColor: t.surface, borderColor: t.axis, textStyle: { color: t.ink, fontSize: 12 } },
@@ -329,9 +343,9 @@ function renderTrend(daily, t) {
       axisLabel: { color: t.muted, fontSize: 11 }
     },
     series: [
-      { name: '事件数', type: 'line', data: (daily || []).map(d => d.events), showSymbol: false, symbolSize: 8,
+      { name: '事件数', type: 'line', data: (daily || []).map(d => d.events), showSymbol: single, symbolSize: 8,
         lineStyle: { width: 2, color: t.s1 }, itemStyle: { color: t.s1 }, smooth: false },
-      { name: '活跃用户', type: 'line', data: (daily || []).map(d => d.users), showSymbol: false, symbolSize: 8,
+      { name: '活跃用户', type: 'line', data: (daily || []).map(d => d.users), showSymbol: single, symbolSize: 8,
         lineStyle: { width: 2, color: t.s2 }, itemStyle: { color: t.s2 }, smooth: false }
     ]
   }, true);
