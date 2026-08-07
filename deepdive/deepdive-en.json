@@ -1,0 +1,274 @@
+{
+ "SNIPER": {
+  "preview": "It's not that you're afraid to pull the trigger — you just refuse to do it casually. You spend more time researching a stock than most people spend on a relationship: reading every page of the filings, building the valuation model, digging through years of management transcripts, waiting for that one moment where the certainty is \"high enough.\" Everyone around you thinks you're careful. Only you know you're not waiting for the best entry — you're waiting for a reason that lets you say \"this wasn't my fault\" if it goes wrong. And the strange part: the longer you wait, the shakier your hand gets at the moment of truth. Because if this one fails, it can't be blamed on bad luck — you studied it for three months and you still got it wrong.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your perfectionism wasn't born with you — it was forged by one big loss on a trade you made \"casually.\" What that loss taught you wasn't stop-losses; it taught you \"never act without research.\" So you turned research into the only variable you can control — you can't control the price, you can't control the news, but you can absolutely grind through PDFs. This is compensation at its core: you trade process discipline for outcome certainty. The problem? The market doesn't hand out effort awards. The deeper you dig, the bigger your sunk cost, and the harder it gets to admit \"I might be wrong about this one.\" The \"high enough certainty\" you're waiting for barely exists in real markets — it's just a shield against admitting that even great research has to be tested by actually trading."
+   },
+   {
+    "title": "Blind spots",
+    "content": "The people you look down on most are the ones who chase hot money — you're convinced they don't deserve to win. What you haven't realized is that your \"deep research\" is sometimes just a respectable excuse for not acting. When a friend excitedly shares a stock, your first move is to find three holes in the logic — and watch the light die in their eyes. You tell yourself you're helping. Really, you're defending a worldview where research is king. You've missed rides your friends tried to pull you onto, and you've missed moves you had correctly identified, because you weren't \"fully confirmed\" yet. The people who truly get you are few — not because you're hard to be around, but because you've already judged the ending before they finish speaking."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "What you need isn't more research — it's a hard rule that says \"stop-loss means stop-loss, no need for a complete logical loop.\" Give every move a physical ceiling: a research time cap, a trial position cap, a holding time cap. Learn to test with small positions — replace \"verify first, then buy\" with \"buy small, then verify.\" You'll be surprised how much faster the market teaches you than three months of research. And most importantly: allow yourself to be wrong once without a three-hour post-mortem. You've never lacked information — you've lacked the courage to act imperfectly. Remember this: the best place for a perfectionist in the market is serving as everyone else's contrarian indicator."
+   }
+  ]
+ },
+ "TURTLE": {
+  "preview": "You've held your positions longer than you've kept any app on your phone. When people ask how you survived the crashes, you say \"I didn't survive anything — I never opened the app.\" It sounds effortlessly zen. Only you know about those nights when you did open it, saw the numbers bleeding green, closed it pretending you saw nothing, and lay in the dark for half an hour before sleep came. You're not calm. You just welded the panic button somewhere you can't reach.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "You weren't born detached. You discovered that making no decision hurts less than making the wrong one. Somewhere in your past there's a cut at the very bottom — the sting of selling right before the rebound — and you swore: never again will I watch. For you, long-term investing isn't a strategy, it's the name of a psychological fortress. You've equated holding with being responsible: as long as I don't move, no one can say I made a wrong move. This logic makes you a legend in bull markets and a loyal disciple of sunk cost in bear markets — especially when your position is down 50% and you still tell yourself the \"back to break-even in three years\" story. At that point you need to ask: is this conviction, or is this fear of looking at the account?"
+   },
+   {
+    "title": "Blind spots",
+    "content": "You can't stand your day-trading friends — to you they're a roulette wheel spinning in place. But you secretly admire their agility: they can exit before a crash while you can only use \"seen, not replied\" as your defense posture. When family asks about your investing, you deflect with \"long-term\" and eventually no one talks money with you anymore. You've saved yourself a lot of arguments — and lost a lot of information: other people's stop-lines, shifts in market sentiment, even opportunities themselves. You've turned yourself into an island. On the island: you, your positions, and one sentence — \"time will tell.\""
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Long-term doesn't mean \"never check.\" What you're missing is a review mechanism: once a quarter, on a fixed day, open the account and answer three questions — Does the original thesis still hold? Can I still sleep with this position? If I were flat today, would I buy this again? The third question matters more than the other two. And please set a physical stop-loss line, write it on paper, and stick it somewhere visible — not so you'll sell, but so you have a no-decision-needed plan for extreme moves. Your problem has never been holding too little. It's holding too much, too long, for no reason you could defend. Remember: real long-term investing is the kind you can check without fear — not the kind you're afraid to check."
+   }
+  ]
+ },
+ "BOT": {
+  "preview": "You trust data more than you trust anyone — including the version of yourself from yesterday. Your trade log goes to two decimal places. Your backtests read like a dissertation. You lose sleep over a moving average parameter being off by 0.5. But the market has a bad habit: sometimes it just doesn't play by your model. In that moment, you fall apart harder than any emotional trader — because you believe falling apart is something that shouldn't happen to a rational person.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "You project control onto numbers because there are things in real life you can't control — and at least candlesticks look like they follow rules. The more complex your strategy, the safer you feel, because complexity itself is a wall that blocks the thought \"maybe the market is fundamentally unpredictable.\" Every backtest you run is the same question in disguise: can you give me certainty? But the market doesn't owe you certainty. What you're actually afraid of isn't losing money — it's losing money with no explanation. That would crack your entire worldview. And you'd rather lose money than look at the crack."
+   },
+   {
+    "title": "Blind spots",
+    "content": "People around you think you're emotionally unavailable. Really, you just don't know how to handle things without a right answer. When someone talks feelings, intuition, \"I just feel like it's going up,\" your internal reply is always \"insufficient sample size.\" You're not cold — you treat every conversation as a data validation. They want resonance; you deliver corrections. Over time, fewer people want to talk markets with you, until it's just you and your backtest curve. But here's what you're missing: the most expensive information in the market comes from people with zero data — capital flows, trading intent, retail panic. You can't quantify them. That doesn't make them less real."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Your model needs a \"human emotion\" variable — stop pretending it doesn't exist. Every week, set aside 10% of your capital and allow yourself to trade on gut feel — not to go wild, but to admit that intuition is also data. Also stress-test your backtest with extreme scenarios: if you hit three stop-losses in a row, could you still execute the strategy? Most models don't die from bad math — they die from hand tremors in live trading. Finally, learn to say \"I don't know\" out loud. Admitting the market is unpredictable doesn't make your work meaningless — on the contrary, knowing what you don't know is the single missing parameter in your model."
+   }
+  ]
+ },
+ "GRANDMA": {
+  "preview": "You calculate the return on grocery shopping, but in the stock market, what you're really doing is charity. Every trade follows a meticulous plan with a win rate that's genuinely impressive — too bad the profits just about cover the fees. You're not incapable of offense; you just rate \"not losing\" ten thousand times higher than \"making more.\" This caution has kept you out of every big trap — and out of every big opportunity. Your life motto is \"steady wins.\" But late at night, you sometimes wonder: what if, that one time, I hadn't been so steady?",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your obsession with certainty usually traces back to one unforgettable loss — maybe not even in the stock market, but some earlier event that taught you \"safety first.\" Ever since, your life has been a risk-avoidance game. Every trade goes through three checks: fundamentals, technicals, and \"can I survive if all of this is wrong?\" This system protects you — and cages you. Every dollar you make is small money, because big opportunities always come attached to volatility you can't accept. You're not the opposite of greed; you're the embodiment of regret-aversion. What you fear isn't losing. It's losing and then blaming yourself: \"why wasn't I more careful?\""
+   },
+   {
+    "title": "Blind spots",
+    "content": "Your adventurous friends find you boring — but privately, they envy how well you sleep. Your real problem isn't too few friends; it's that you've infected the next generation with caution. When family asks for investing advice, you always say \"just keep it in the bank\" — not because the bank is genuinely best, but because if your advice lost money, you'd blame yourself harder than they would. You're used to carrying all the risk on your shoulders, and in the process you've locked the door on opportunity too. You can't stand the word \"all-in.\" But you should admit: the people you admire don't rely on bigger balls — they rely on being willing to own being wrong. That's something you're actually capable of."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Loosen your safety margin a little, and you'll discover \"a little gambling\" and \"steady\" are not enemies. Bucket your assets into three layers: the bulk stays in your comfortable style (that's the sleep-well money), a small slice gets a hard ceiling, dedicated to \"opportunities you'd normally never touch\" — small enough that losing it costs no sleep, big enough that winning it actually registers. You'll discover a secret: once the worst case is capped in advance, your courage will surprise even you. You've never lacked judgment. You've lacked permission to make small, contained mistakes."
+   }
+  ]
+ },
+ "PROPHET": {
+  "preview": "When you buy, it's not a position — it's a conversion. You believe in a story, and then you tell it to everyone — including the version of you that isn't fully convinced yet. When people ask about your position size, you say \"faith doesn't need to be measured in positions.\" But late at night, you've quietly checked the real-time price of that faith more than a few times. You're not investing in a company. You're betting on a future. And the scariest part: your story is so good, you've convinced yourself.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your craving for a narrative of certainty is, at its core, a rebellion against an uncertain world. You don't need a good company — you need a story you can tell other people. Because a story gives you control: as long as the logic holds together, the world stays inside your understanding. Your problem isn't misreading the direction; it's refusing to revise when you have. When reality conflicts with your story, you find reasons for reality — not patches for the narrative. \"Institutional washout,\" \"sentiment-driven selloff,\" \"short-term noise\" — your vocabulary has infinite words to protect a single belief. Deep down you know the truth. You just can't stop, because stopping would mean admitting that what you treated as faith was just an ordinary, losable trade."
+   },
+   {
+    "title": "Blind spots",
+    "content": "People around you were initially infected by your passion — then they started avoiding the topic. Because every time you speak, it's a sermon, and sermons don't allow questions. When a friend says \"maybe trim the position,\" you hear not advice but \"he doesn't believe me.\" You divide people into two camps: believers and the uninitiated. That has given you followers — and cost you true friends. You've never known that the people who really care about you spotted the holes in your story long ago, but didn't interrupt because you were so deep in the telling. You've missed countless hands reaching out to pull you back, because you translated every piece of good-faith caution into betrayal."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Faith and position management can coexist. What you need to learn isn't doubt — it's staged verification. Break your story into three falsifiable checkpoints: what data appearing = thesis confirmed, what data appearing = thesis dead. Write it down. Tape it next to your trading screen. Then apply a \"faith discount\" to your position: you may keep believing, but the cap must never exceed the number you'd be willing to lose entirely. Finally, practice accepting a brutal fact: your story is probably right in skeleton and wrong in details — and the people who make money are the ones who keep the skeleton and adjust the details, not the ones who weld the details shut to save face."
+   }
+  ]
+ },
+ "MONK": {
+  "preview": "Your investment strategy: buy, forget, let it be. The day the market crashed, you were asleep — that's why you beat everyone. Occasionally you open the app — oh, it doubled — and you go back to sleep. Everyone envies this ease. Only you know that this \"not caring\" was faked at first. You didn't actually let go. You just moved the account to a blind spot in your own field of vision and pretended it didn't exist.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your \"let it be\" almost certainly comes from one wound that was too deep. Maybe you were heavily positioned once, watched it fall from heaven to the basement, and could do nothing. After that, you learned a skill: move your attention away from the account. Given enough time, you even believed your own story about having a great mindset. Zen is the armor you put on. Underneath is the version of you that never wants to feel that helpless again. Your problem is that you can't tell whether you've \"seen through it\" or \"avoided it\" — and on the equity curve, the two look identical. Until the day you need the money, force yourself to open the app, and realize you've been mistaking \"not looking\" for \"not managing.\""
+   },
+   {
+    "title": "Blind spots",
+    "content": "Friends think you have a great mindset — but they also suspect you're a bit too careless with money, which makes partnership harder. You say \"you guys decide,\" while there's a scale inside you that you never calibrate out loud. You're afraid to reveal that you care, because caring means you could get hurt again. So you miss chance after chance to communicate honestly: when you should voice displeasure, you stay silent; when you should take a position, you say \"whatever.\" You think being easygoing is grace. In other people's eyes, sometimes it reads as \"he doesn't care about our shared money.\" You deserve to be trusted. But trust starts with letting people see that you actually care."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "What you need isn't more \"engagement\" — it's a lightweight, recurring check-in: a calendar reminder on the first of every month. Ten minutes. One question: if I were allocating today, would I keep this position? If you can't answer, it's time to actually look. You don't need to become a screen-stalker. You need \"let it be\" to become an active choice instead of a passive outcome. Remember: real zen is \"I looked, and then I let go.\" Not \"I'm afraid to look, so I let go.\" One is an achievement. The other is just kicking the problem down the road to a day you'll be forced to face it."
+   }
+  ]
+ },
+ "God of Gamblers": {
+  "preview": "When you win, they call you the stock god. When you lose, they call you a degenerate. You think those are the same person. Your market feel is freakishly strong — but your hand is faster than your feel. One day without trading and you're in withdrawal. The shortest holding period in your history: forty minutes. This \"must be in the game\" urge is your greatest gift and your greatest flaw — because what you actually enjoy isn't making money. It's the dopamine of making decisions.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "This compulsion to trade is closer to emotional regulation than strategy. Every order you place is really a way of handling the restlessness inside you: you trade when bored, you trade when anxious, you trade when happy — to celebrate. Your market feel is genuinely good, so good that the market mostly does follow your gut — which is exactly the trap. Because nine times out of ten you're right, you can never tell whether the tenth was \"off day\" or \"feel broken.\" You've taken a genuine gift and used it in the most dangerous way: repeating the same move at high frequency, until one day the market plays a script you never imagined, and collects all ten wins in a single settlement."
+   },
+   {
+    "title": "Blind spots",
+    "content": "People love to ride along on your adventures — but no one will actually trust you with their capital. You're the brightest one at the dinner table, gesturing wildly about the market, and everyone leaves thinking \"there's meat on this ride.\" But when it's time to actually put money in, everyone finds an excuse to disappear. You don't lack friends — you lack trust. Your lifestyle tells people that your money and your judgment both come and go fast. You know this, vaguely, which is why you never discuss losses in public: you're afraid that once the mask slips, even the illusion of \"following him is safe\" will be gone. But real friends aren't there to watch you win. They're there to sit with you when you lose."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Change your holding period from 3 hours to 3 days — not to make more money, but to survive first. Your problem has never been stock selection. It's the compulsion to do something. Set hard rules: max one position per day; write down the thesis and the stop price before opening; no touching after the close. You can absolutely make money on feel — you just need to bolt a brake onto it. Racers don't drive slowly; they know which corners demand braking. And here's a bet worth taking: if you can go one full month without trading out of itch, you'll discover your returns didn't drop — but your sleep quality went up."
+   }
+  ]
+ },
+ "GEAR": {
+  "preview": "Other people invest. You have a side hustle. Your goal is beautifully modest: make breakfast money and get out. Good news: you never lose big. Bad news: what you make wouldn't buy a decent coffee. Your daily routine is more punctual than your day job: watch the open at 9:30, buy at 10, bank the profit at 11, lunch on time. Your equity curve is as flat as your KPI — stable enough to make people's hearts ache. You've beaten 90% of retail on mindset. You've never once beaten the market.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your \"small win, run fast\" obsession is really about treating the stock market as a second job that must have a quitting time. What you fear isn't losing — it's being stuck, because being stuck means this side hustle starts eating your sleep, violating your no-overtime principle. So your strategy became: take profit on any gain, cut any loss, never give yourself the chance to be stuck. This playbook makes you the steadiest person in your circle — and keeps you permanently in the minor leagues. Every \"bank the profit\" is rent you pay for safety, and the market's real returns have never once been discounted because you wanted to clock out early."
+   },
+   {
+    "title": "Blind spots",
+    "content": "People think you're too conservative. They don't know you've already run the risk-reward math — you're smarter than they assume, you just deployed your intelligence into \"how to worry less.\" You don't really talk investing with people, because you've decided talking wouldn't change anything. That decision has quietly cost you information and opportunities. A friend invites you to a research group; you say \"no time.\" But that night you watched three hours of short videos. You have time. You just have a spreadsheet of energy allocation that's too rigid — you've put investing inside a box marked \"9:30 to 11:00 AM\" and, in the same stroke, locked opportunity out of the box."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Extend your holding period a little. Your employee mindset is actually better suited to dollar-cost averaging than to day trading. Your biggest asset is stability — and your biggest waste is also stability: stable small wins, stable missed moves. Try this experiment: double the holding period on every trade. Don't run on green; see what happens. You'll find that most of the time, holding one more day costs nothing, and occasionally, holding one more week pays more than a month of \"breakfast money.\" You don't need to become a gambler. You just need to admit the market rewards holders more than runners — you don't lack exit discipline. You lack the courage to sit."
+   }
+  ]
+ },
+ "MARTYR": {
+  "preview": "Your research report fills three pages. The risk warning is on page four. You didn't read it. You're convinced this time is different; the market keeps insisting every time is the same. You're one success away from financial freedom and one failure away from the ledge — and you genuinely enjoy the tightrope. When people tell you to cut the leverage, what you hear isn't risk advice. It's \"he doesn't understand my opportunity.\" You didn't lose to the market. You lost to the version of yourself that had to win in front of everyone.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your love affair with leverage is fundamentally impatience with getting rich slowly. There's a timetable inside you: financial freedom before thirty, before everyone who ever looked down on you can finish smiling. Leverage is the only shortcut on that timetable — it lets your capital pretend to double, and it doubles your anxiety in the same transaction. Your psychology before every margin call is eerily consistent: \"This time I've got it. It's locked.\" Your psychology after every blow-up is equally consistent: \"Just give me one more shot.\" Your problem isn't judgment — your judgment is honestly above average. It's that your timetable is so greedy it keeps asking your judgment to do things judgment can't do."
+   },
+   {
+    "title": "Blind spots",
+    "content": "When family and friends urge you to pull back, what you hear isn't concern — it's \"they don't believe I can succeed.\" You've equated pulling back with surrender, and cutting position size with admitting inadequacy. The people around you noticed long ago that something was off: you've been losing weight, staying up late, getting short-tempered. But you've deflected every expression of care with the phrase \"grinding for the big one.\" You've made your life a one-man show where you're the lead, the audience, and the judge. The people who love you are watching from the front row, hearts racing, afraid to speak — because every time they do, you perform the show with even more intensity."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Leverage isn't forbidden. What's forbidden is relying on willpower — which is the one thing you can't rely on. When you're down bad, no reasoning reaches you. So the rule must live outside you: give a trusted person view access to your account, with an agreement — \"if stop-loss triggers twice in a row, you strip all my leverage for me.\" Or set a physical red line: beyond a certain leverage ratio, liquidate everything automatically. You need to accept a brutal truth: every dollar you've made so far wasn't \"risk management working.\" It was luck that you didn't get caught. You're alive in this market not because you're strong, but because the market hasn't bothered to settle the full bill yet."
+   }
+  ]
+ },
+ "BAGHOLDER": {
+  "preview": "You have a 100% record of buying at the top — even after a stock has already gone up tenfold, you'll find a way to catch it. Your biggest asset is called \"waiting to break even.\" It's been three years. The good news: you finally learned to cut losses. The bad news: the moment you learned it, the stock bounced. This level of precisely targeted misfortune is a talent with special attention from above. You say \"whatever, I'll just hold it\" — only you know that every time you see that cost basis, it stings like a needle.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your \"buy at the top\" constitution is tied to a specific psychological bias — you act at the exact moment your FOMO peaks. You watch it climb, and the climbing itself becomes unbearable, until you enter at the instant \"if I don't get on now, I'll miss it forever.\" You're not buying a stock. You're buying the thought \"I refuse to miss out again.\" And worse: once you hold, you develop a cost-basis cult. Your decision coordinate system shifts from \"is this worth it now\" to \"how many points to break-even.\" Every piece of information gets translated into \"distance to my cost.\" You're not investing. You're in a relationship with your cost basis — and in that relationship, the market never promised to be faithful."
+   },
+   {
+    "title": "Blind spots",
+    "content": "Your friends privately call you the contrarian indicator — whatever you buy, it drops. But nobody thinks you're stupid. Everyone just feels bad for how honest you are. You never hide your losses; you narrate them with self-deprecation, which made you the group's comedian — and the person nobody takes seriously. When you say you're bottom-fishing, people smile and move on. You've noticed, long ago, that your words carry less and less weight in your circle, and you have no idea how to earn it back. You haven't lost to bad judgment. You've lost because you equate admitting error with losing face: as long as you never say \"I sold wrong,\" you feel like you haven't lost."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "What you need isn't better timing — it's a forced staged-entry discipline. From today: any stock gets at most one-third of your planned size on entry. Add on strength; add more on weakness — but before every add, ask: if I were flat today, would I buy this right now? That answer is more real than any indicator. And practice one deliberate \"admission of error\": pick a stock you've held for three years, sell it at a point that isn't the bottom — not to break even, but to take back the steering wheel of your own decisions. You'll find the relief of selling outweighs the thrill of waiting to break even."
+   }
+  ]
+ },
+ "FOMO": {
+  "preview": "Your trade history has no entries under the word \"missed\" — because whenever the market is rising, you are in it. Your buy reason is always \"it's still going up.\" Your sell reason is always \"it went down.\" Your strategy, in essence, is one word: chase. You've chased the hottest sectors, bought the most expensive fads, and asked for ticker codes every time a friend screenshotted gains. You've made money — but that money isn't earned. It's parked with you by the market, and the market will come back for it.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your chasing is, at its core, social behavior. You're not afraid of losing money — you're afraid of not being in the room when everyone else is making it. For you, missing a rally hurts more than a loss: a loss at least proves you participated. Missing means being excluded from the conversation. So you can't wait for pullbacks, can't wait for confirmation; you enter the moment \"it's already moving.\" You're not buying value — you're buying presence. Your equity curve tells the whole story: you chase in on the way up, cut out on the way down, and the round trip donates fees to the market and anxiety to yourself."
+   },
+   {
+    "title": "Blind spots",
+    "content": "You're the most active intelligence hub in your circle — everyone brings you news first, because you know a lot and you forward fast. But think honestly: has anyone ever actually followed your advice? People treat you as a thermometer for hotness, not a reference for judgment — because what you share is always the newest trend, never the steadiest view. People have made money off your information. No one has entrusted you with their principal. That stings a little on quiet nights: you worked so hard to keep up with the market — why do people treat you as a signal source instead of a partner?"
+   },
+   {
+    "title": "Growth prescription",
+    "content": "You need to replace \"chase\" with \"wait.\" One iron rule: no hot trend gets bought until it has pulled back at least 15%, and before any buy you must write one sentence — \"why buy now instead of last week?\" If you can't write it, you don't buy. Your greatest asset is how plugged in you are; your greatest waste is spending that information advantage at the most dangerous position (the top) instead of the safest one (confirmed pullback). And once a week, leave a group that makes you anxious — your mood doesn't belong to other people's gain screenshots. Remember the most expensive sentence in the market: \"someone on my feed made money.\""
+   }
+  ]
+ },
+ "STALKER": {
+  "preview": "You're not watching the market. You're guarding it. Your phone's screen-time report lists your trading app at #1 without contest: you check US futures before your eyes open, scroll news on the commute, check positions at lunch, and do one final \"nothing major happening\" scan before bed. Your stock barely moves. You, meanwhile, have adopted a fund manager's schedule. When people ask how you hold so steady, you say \"I know it well.\" Only you know you hold steady by refreshing every minute to suppress the voice saying \"should I run?\"",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your high-frequency screen-watching is, at its core, self-soothing through the illusion of control: you believe the more you look, the better your odds of catching the move and dodging the drop. But the market doesn't change course because you looked at it — it just costs you three hours of sleep. Your anxiety doesn't come from the position. It comes from the fear of an information vacuum: one minute without checking and you're certain something happened. The irony? Nearly every trade impulse you've acted on arrived at the moment \"watching turned to can't-stop-watching.\" You stare at it not because it needs you — but because you need it to confirm that everything is still under control. And the one thing the market is best at is making you believe you're in control."
+   },
+   {
+    "title": "Blind spots",
+    "content": "Your family and friends have long since made room for the trading app in your life. You scroll during dinner, scroll in the movie theater, and even mid-conversation your eyes drift to that one line on the screen. You say \"just a quick check\" — but the people who love you know that quick check is followed by five minutes of silence. You're not neglecting them on purpose. You've convinced yourself that watching the screen equals being responsible — as if not watching would be a betrayal of the account. But ask yourself this: you've given the account every ounce of your attention, and has the account ever given a single minute of attention back to your life? The thing that actually deserves guarding was never that line on the chart."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Give screen-watching a legal schedule, like clocking in: three windows a day, no more — 15 minutes after the open, 10 minutes at lunch, 10 minutes after the close. Everything else, bury the app icon in a folder. It will hurt at first, like withdrawal. But two weeks in, you'll be shocked to discover that most of the \"major events\" you feared were nothing at all. The biggest asset in your portfolio was never that stock. It's your attention — and attention is the one thing the market is always buying at a discount. What you need to learn isn't how to watch more accurately. It's how to not watch with dignity."
+   }
+  ]
+ },
+ "DREAMER": {
+  "preview": "You don't buy stocks. You buy parallel universes — ones where you quit the job, bought the house, traveled the world, and never have to look at your boss's face again. Your holding thesis is \"it'll come back up someday.\" You've rehearsed that \"someday\" a hundred times, but you've never once given the word \"someday\" a deadline. Your dream is expensive — so expensive your account has been paying interest on it for three years. You're not greedy. You just treat investing as a portal to the life you want. Unfortunately, portals charge admission too — and you've been buying tickets with borrowed future.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your \"dream investing method\" comes from a very common psychological compensation: in real life you feel stuck — the job, the mortgage, the same day on repeat — and the stock market is the only exit you can see. So you don't buy a stock; you buy a promise of turning your life around. That promise lets you tolerate today's grind, and lets you tell yourself \"it's for the future\" every time you lose. The problem: dreams are far away, and time is close. You've sacrificed too much concrete present for an abstract future — you hold what should be cut, you concentrate what should be diversified, because your decision standard isn't \"how is this money doing now\" but \"does it fit my script?\" "
+   },
+   {
+    "title": "Blind spots",
+    "content": "You don't really talk about your actual positions, because real numbers puncture dreams. You prefer talking about \"which sectors do you like\" and \"what will be big in ten years\" — when you talk about those, your eyes light up, and people think you're visionary. Only you know that between your vision and your account sits a chasm you've never dared to cross. When family asks how it's going, you say \"still building the position.\" When friends ask about adding, you say \"long-term.\" You've become the \"about to be successful\" person in your own story — and the people around you have slowly realized you've just postponed success indefinitely. They never stopped believing in your dream. They stopped believing in your execution."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "Translate \"someday\" into \"this specific day.\" Give your dream three verifiable checkpoints: for example, \"if the account doesn't reach X in two years, the script gets rewritten.\" You don't have to abandon the dream — but it has to carry a price tag, so you know what you're paying for every day. And separate the imagined gains from the actual portfolio: you can keep dreaming freely, but position rules must obey reality — stops, diversification, scheduled reviews, none of them optional. Understand this: the portal to the life you want was never a single stock. It's a system you can actually follow for years and still sleep at night. Dreams set the direction. Systems get you there."
+   }
+  ]
+ },
+ "GHOST": {
+  "preview": "You've uninstalled your trading app more times than you've closed positions. Every big drop, your first reaction isn't analysis — it's \"out of sight, out of mind\": log off, delete, disappear, as decisive as a breakup. But you know the positions are still there. They've just moved into the blind spot of your memory. On the surface you've \"let go.\" In reality, you've hidden the keys to your own account and pretended you never bought anything. When the market falls, you vanish. When it rises, you rise from the dead. Your investing career is the opening scene of a horror movie.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your \"uninstall method\" is, at its core, an emotion-management technique: you can't handle the pain of loss, so you handle the channel that shows you the loss instead. This pattern usually traces to one traumatic memory — a cut that scarred you, conditioning you into: pain = close the app. But here's the catch: what you close isn't the loss. It's your right to know. You tell yourself out of sight is out of mind, but the market doesn't pause because you uninstalled. The anxiety was never gone — it was just deferred to the day you open the app again, and it returns with interest. Every \"disappearing act\" deepens your fear of the account, making it harder to open next time. A loop with no exit."
+   },
+   {
+    "title": "Blind spots",
+    "content": "Your family knows you \"invest.\" They don't know what you hold or how much you've lost — you've kept every question out with a string of \"it's fine\" and \"no worries.\" You're not hiding on purpose. You're afraid of explaining: afraid they'll push, afraid you won't have an answer, afraid that \"so what exactly did you buy\" will force you to face the number you've been avoiding. But do you realize — your silence worries them more than your losses do? The real risk was never the position. It's that you carry all the emotion alone while refusing every hand reaching out. You've made yourself the ghost of your own account: present, but unseen — and unwilling to be seen."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "What you need isn't a fresh start. It's one act of facing. Pick a weekend, open the app you've deleted three times, list every position, and run the worst-case math: if it all went to zero, would your life end? Almost certainly not — and that answer is the one you've been needing. Then delete the word \"uninstall\" from your toolkit permanently. You may uninstall it in your mind, but not from your phone — because uninstalling doesn't solve the problem, it just delays it. Finally, practice telling at least one person the truth about your positions and your losses. Say it out loud and you'll find the sky doesn't fall — and the person who listened will be the reason you never need to vanish again."
+   }
+  ]
+ },
+ "YOLO": {
+  "preview": "Your motto is \"you only live once,\" which translates to investing as \"if you're not all-in, you're not participating.\" Your account has exactly two states: fully invested, or just sold and about to be fully invested again. You've made big money and lost big money, and your life philosophy makes both feel equally exciting. When friends tell you to keep some cash, you answer: \"cash is for dead people.\" Then you pile your living expenses and your dreams into the next candle. You know what risk is. You just believe \"a life without risk is the real risk.\"",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your all-in tendency is what psychology calls all-or-nothing thinking — the option of \"partial participation\" doesn't exist in your system. This mindset usually comes from a core belief: opportunity is scarce, miss it and it's gone, so every moment demands a full swing. You crave the thrill of \"all win or all lose,\" because it makes every ordinary day feel like a championship fight. But the market isn't a boxing ring — it's a marathon. It won't award you a courage medal for betting everything today; it will gently grind your \"everything\" into \"a fraction,\" until one day you realize you've replaced \"living well\" with \"betting again.\" Your courage is real. Unfortunately, the market doesn't reward courage. It rewards survival."
+   },
+   {
+    "title": "Blind spots",
+    "content": "Everyone around you admires your decisiveness. Nobody dares to copy it. You're the life of the party — because you supply the best stories — and also the person nobody deepens ties with, because your lifestyle quietly signals \"his future is unstable.\" Your family stopped objecting to your investing long ago, because objecting never changed anything. They just read each of your post-all-in silences as \"he's brewing something big.\" You've never actually told them that your \"you only live once\" is, half the time, the anxiety of \"I only have one chance left.\" What you need isn't an audience. It's one person who can say \"slow down — I'm waiting for you.\" But you never give anyone the opening."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "That phrase \"you only live once\" also contains the option \"taking it slow.\" Your nerve doesn't need confiscating — it needs routing. Split your money into three buckets: one for the thrill-seeking that keeps you sane, one parked where you physically cannot touch it for three months, and one as survival money that nobody touches — including you. You'll discover a secret: when you know you have a way out, the quality of your decisions skyrockets — because \"I can afford to be wrong\" is the real foundation of confidence. You've never lacked courage. You've lacked the wisdom to spend it where survival is possible. Remember: the market's most respected players aren't the ones who won the biggest. They're the ones who lasted the longest."
+   }
+  ]
+ },
+ "CHICKEN": {
+  "preview": "Your trading career can be summarized in one line: buy the top, sell the bottom, emotions always at their peak. Your decisions aren't based on analysis — they're based on your heartbeat. Up makes you fear missing out; down makes you fear going to zero. Every operation you've made stepped precisely on the knife edge of emotion. The day you cut your losses was usually the market's low. The day you chased in was usually the stage top. A friend once told you that you're cursed. But you know the truth: you're not unlucky. You're the product of your own panic and greed — dancing a duet with yourself.",
+  "sections": [
+   {
+    "title": "Root causes",
+    "content": "Your buy-high-sell-low pattern is textbook emotion-driven trading — and textbooks use it as the cautionary example. Your problem isn't intelligence; it's reaction speed. When the market rises, your dopamine arrives before the capital does, so you buy at the most expensive moment. When it falls, your fear beats your reason to the punch, so you sell at the cheapest moment. Deep down you know the principle of \"buy low, sell high.\" But your fingers are always half a beat ahead of the principle. The irony: almost every \"final decision\" you've made happened at the emotional peak or trough — your conviction doesn't come from analysis. It comes from \"I can't take it anymore.\" And the market's favorite customer has always been the person who can't take it anymore."
+   },
+   {
+    "title": "Blind spots",
+    "content": "You're a very genuine person — your emotions live on your face: pay for dinner when you win, disappear when you lose. Friends all know you're \"big-hearted,\" but nobody would hand you anything important: your mood is too easily moved by the market, and people aren't sure you could carry their weight on top of yours. When you lose, you go quiet — slow to reply, absent from dinners. You don't say why, but everyone can tell. You desperately need someone to pull you out in those moments. But you've never once asked, so everyone just pretends nothing happened during your \"disappearing days.\" You don't lack friends. You lack the habit of allowing yourself to be caught."
+   },
+   {
+    "title": "Growth prescription",
+    "content": "You need a mandatory cooldown process: any operation instruction gets written down first, then left alone for 24 hours, and only then executed. You'll find that 90% of impulses evaporate on their own during the cooldown — and most of the remaining 10% are the ones actually worth doing. Also, separate watching from operating completely: you may look all you want, but you're allowed to trade once a week — like payday, fixed and immovable. Your greatest gift is sensitivity: it lets you sense market mood earlier than most. The tragedy is you've spent that gift on running with the mood instead of observing it without moving. Starting today, try being the person watching the show — not the person in it."
+   }
+  ]
+ }
+}
