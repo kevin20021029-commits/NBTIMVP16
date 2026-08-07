@@ -5659,5 +5659,14 @@ restoreFromHash(); /* 幂等:head 的 DOMContentLoaded 亦会调用,已渲染则
   }, 1500);
 })();
 </script>
+<div id="confirmModal" class="confirm-overlay" style="display:none;">
+  <div class="confirm-panel">
+    <div class="confirm-title" id="confirmTitle"></div>
+    <div class="confirm-desc" id="confirmDesc"></div>
+    <button class="btn" id="confirmPrimary"></button>
+    <button class="btn confirm-secondary" id="confirmSecondary"></button>
+  </div>
+</div>
+<div id="toast"></div>
 </body>
 </html>
