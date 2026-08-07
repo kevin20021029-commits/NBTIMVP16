@@ -47,6 +47,7 @@ const REQUIRED_IDS = [
   'sign-load',
   // 分享卡模板/预览弹窗
   'shareCardTemplate916',
+  'shareCardTemplate45',
   'sharePreviewModal',
   'sharePreviewImg',
   'sharePreviewSpin',
