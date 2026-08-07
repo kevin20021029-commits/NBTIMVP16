@@ -573,7 +573,9 @@ async function loadData() {
     $('stamp').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', { hour12:false });
     hideBanner();
   } catch (e) {
-    showBanner('加载失败: ' + e.message + (e.message.includes('Failed to fetch') ? '(检查网络或 Vercel 域名可达性)' : ''));
+    /* 含堆栈,便于定位是哪一行(如元素缺失) */
+    showBanner('加载失败: ' + e.message + (e.message.includes('Failed to fetch') ? '(检查网络或 Vercel 域名可达性)' : '') +
+      '<br><span style="font-size:11px;opacity:.7">' + esc((e.stack || '').split('\n').slice(0, 3).join(' | ')) + '</span>');
   } finally {
     $('refreshBtn').disabled = false;
     $('refreshBtn').classList.remove('spin');
