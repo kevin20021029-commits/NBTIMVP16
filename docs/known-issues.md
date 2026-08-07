@@ -78,3 +78,22 @@ E2-P1 已把生产 6 页 96 处裸访问改 safeEl/safeFail(no-bare-dom-access �
 **结论**: 预览≠导出成立(P0 类)。现有全部基于预览的视觉验收方法无效;验收必须用导出图(html2canvas 产物)。
 **同类潜在分歧属性**: 半透明 alpha 合成(shadow/border/背景)、opacity、PNG/webp 透明通道、border-radius 抗锯齿。完整清单见 docs/visual-spec.md §6。
 **本轮不修**(2/3 整体重做 stage)。
+
+
+## 10. F4 证据: 仓库漂移事件两次(2026-08-07 H-POC 轮)
+
+**事件一(NBTI48 H-P0 误落 main)**: H-P0 commit c6f1a5d 在 NBTI48 的 main 上创建(未建分支即 commit)。
+纠正(reflog 完整还原): `git branch feat/card-prerender-poc c6f1a5d` → `git checkout feat/card-prerender-poc`
+→ `git checkout main` → `git reset --hard 7bf09a1` → `git checkout feat/card-prerender-poc`。
+**未 force push,远端 main 从未被污染**(纠正前 main 领先 origin/main 1 commit 但未推送)。
+根因: 双仓库操作时 NBTI16 建了分支、NBTI48 忘记建。
+
+**事件二(文档/测试历史漂移 + H-P4 未同步)**: 本轮 B0b 全量校验发现 4 文件漂移——
+① known-issues.md 缺第 9 条、visual-spec.md 缺第 6 节(C3 内容只进了 16)
+② tests/dom-contract.spec.ts 与 tests/text-check.spec.ts 是 E2 时代旧版(48 缺 C3 后 39 节点重构)
+③ H-P4 文档(8052fb1)只在 16。
+已按 16 为权威版同步 48,8 文件 byte-identical 验证通过,48 test:dom 15/15 全绿。
+根因: C3 轮起对 48 的 docs/tests 同步靠人工记忆,无强制校验。
+
+**对策(写入 B5 层次一)**: tests/ docs/ shared/ 必须收进强 byte-identical 校验,
+不一致即 test:dom 报红(具体方案见 docs/architecture-card-prerender.md 与 B5 结论)。
