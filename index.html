@@ -4866,6 +4866,45 @@ function downloadCard() {
   track('share_card_download', { ratio: shareCardRatio });
   toast('图片已保存，可在相册中找到，打开微信发送给好友吧');
 }
+/* ============ 进度保存与续答(确认弹层) ============ */
+var PROGRESS_KEY = getProgressKey(); /* v1:语言解耦,保留题数维度 */
+  migrateProgress(); /* 迁移旧语言后缀 key(幂等) */
+function showConfirm(opts) {
+  document.getElementById('confirmTitle').textContent = opts.title;
+  document.getElementById('confirmDesc').textContent = opts.desc;
+  var p = document.getElementById('confirmPrimary');
+  var s = document.getElementById('confirmSecondary');
+  p.textContent = opts.primary;
+  s.textContent = opts.secondary;
+  p.onclick = function() { hideConfirm(); if (opts.onPrimary) opts.onPrimary(); };
+  s.onclick = function() { hideConfirm(); if (opts.onSecondary) opts.onSecondary(); };
+  document.getElementById('confirmModal').style.display = 'flex';
+}
+function hideConfirm() { document.getElementById('confirmModal').style.display = 'none'; }
+function saveProgress() {
+  try {
+    /* 存下一未答题索引:续答后直接落在未答题上 */
+    var next = Math.min(userAnswers.length, QUESTIONS.questions.length);
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ answers: userAnswers, current: next }));
+  } catch (e) { /* 隐私模式等场景忽略 */ }
+}
+function loadProgress() {
+  try {
+    var raw = localStorage.getItem(PROGRESS_KEY);
+    if (!raw) return null;
+    var d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.answers) || !d.answers.length) return null;
+    if (d.answers.length > QUESTIONS.questions.length) return null;
+    return d;
+  } catch (e) { return null; }
+}
+function clearProgress() { try { localStorage.removeItem(PROGRESS_KEY); } catch (e) {} }
+function restoreProgress(d) {
+  userAnswers = d.answers;
+  current = Math.min(d.current || 0, QUESTIONS.questions.length);
+  if (current >= QUESTIONS.questions.length) { showSubmit(); }
+  else { show('page-quiz'); renderQuestion(); }
+}
 /* ============ 其他 ============ */
 function restart() { startQuiz(); }
 function goHome() {
