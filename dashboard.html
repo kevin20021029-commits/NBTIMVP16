@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeuralFin NBTI 数据看板</title>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script>if(!window.echarts){document.write('<script src="https://cdn.staticfile.net/echarts/5.5.0/echarts.min.js"><\/script>')}</script>
+<style>
+/* ---- 主题令牌(与下方 JS 的 THEME 对象保持同步) ---- */
+:root[data-theme="dark"] {
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #008300; --hover: rgba(255,255,255,0.06); --ok: #0ca30c;
+}
+:root[data-theme="light"] {
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #008300; --hover: rgba(11,11,11,0.05); --ok: #006300;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--page); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 20px 20px 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; }
+
+/* ---- 头部 ---- */
+header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.2px; }
+header .sub { color: var(--muted); font-size: 13px; }
+header .spacer { flex: 1; }
+#themeBtn { background: var(--surface); color: var(--ink2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+#themeBtn:hover { background: var(--hover); }
+
+/* ---- 过滤行:所有图表共享同一层过滤 ---- */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.filters .group { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; }
+.filters label { color: var(--muted); font-size: 12px; }
+.preset { background: transparent; color: var(--ink2); border: none; border-radius: 6px; padding: 5px 10px; font-size: 13px; cursor: pointer; }
+.preset:hover { background: var(--hover); }
+.preset.active { background: var(--s1); color: #fff; }
+select, input[type="date"] { background: var(--surface); color: var(--ink); border: 1px solid var(--axis); border-radius: 6px; padding: 5px 8px; font-size: 13px; }
+#refreshBtn { background: var(--s1); color: #fff; border: none; border-radius: 8px; padding: 7px 18px; font-size: 13px; font-weight: 500; cursor: pointer; }
+#refreshBtn:disabled { opacity: 0.5; cursor: wait; }
+#banner { display: none; margin-bottom: 14px; padding: 10px 14px; border-radius: 8px; font-size: 13px; background: rgba(211, 59, 59, 0.12); color: var(--ink2); border: 1px solid var(--border); }
+#stamp { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+/* ---- KPI ---- */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.kpi .k-label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.kpi .k-value { font-size: 30px; font-weight: 600; line-height: 1.1; }
+.kpi .k-sub { color: var(--ink2); font-size: 12px; margin-top: 6px; }
+.kpi .k-value.ok { color: var(--ok); }
+
+/* ---- 图表卡片 ---- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.card h2 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.card h2 small { color: var(--muted); font-weight: 400; margin-left: 8px; }
+.chart { width: 100%; }
+.chart.tall { min-height: 320px; }
+
+/* ---- 明细表 ---- */
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { color: var(--muted); text-align: left; font-weight: 500; padding: 6px 10px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+td { padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; color: var(--ink2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:hover td { background: var(--hover); }
+.tbl-scroll { overflow-x: auto; max-height: 380px; overflow-y: auto; }
+td.url { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.ev-name { color: var(--ink); font-weight: 500; }
+
+/* 刷新时保持旧内容,只降透明度,不跳布局 */
+body.loading .card, body.loading .kpi { opacity: 0.55; }
+body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>NeuralFin NBTI 数据看板</h1>
+    <span class="sub">16题版 + 48题版 · GA4 双轨 · 自建管道</span>
+    <span class="spacer"></span>
+    <span id="stamp"></span>
+    <button id="themeBtn" title="切换明暗主题">🌙 暗色</button>
+  </header>
+
+  <div id="banner"></div>
+
+  <div class="filters">
+    <div class="group">
+      <label>时间</label>
+      <button class="preset" data-days="1">今天</button>
+      <button class="preset active" data-days="7">7天</button>
+      <button class="preset" data-days="30">30天</button>
+      <button class="preset" data-days="90">90天</button>
+      <button class="preset" data-days="0">全部</button>
+      <input type="date" id="fromDate" title="自定义起始">
+      <span style="color:var(--muted);font-size:12px">—</span>
+      <input type="date" id="toDate" title="自定义结束">
+    </div>
+    <div class="group">
+      <label>地区</label>
+      <select id="countrySel"><option value="">全部</option></select>
+    </div>
+    <div class="group">
+      <label>行为</label>
+      <select id="eventSel"><option value="">全部</option></select>
+    </div>
+    <div class="group">
+      <label>版本</label>
+      <select id="versionSel">
+        <option value="">全部</option>
+        <option value="16题版">16题版</option>
+        <option value="48题版">48题版</option>
+      </select>
+    </div>
+    <button id="refreshBtn">刷新</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k-label">总行为</div><div class="k-value" id="kEvents">—</div><div class="k-sub" id="kEventsSub"></div></div>
+    <div class="kpi"><div class="k-label">活跃用户</div><div class="k-value" id="kUsers">—</div><div class="k-sub">所选范围内去重</div></div>
+    <div class="kpi"><div class="k-label">总用户</div><div class="k-value" id="kAllUsers">—</div><div class="k-sub">全时段去重</div></div>
+    <div class="kpi"><div class="k-label">完成率</div><div class="k-value ok" id="kRate">—</div><div class="k-sub">完成测试 ÷ 打开网页</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h2>转化漏斗 <small>打开 → 开始 → 完成 → 分享卡 → 深度解读</small></h2><div class="chart tall" id="funnelChart"></div></div>
+    <div class="card"><h2>日趋势 <small>事件数 / 活跃用户</small></h2><div class="chart tall" id="trendChart"></div></div>
+    <div class="card"><h2>人格分布 <small>test_completed</small></h2><div class="chart" id="personaChart"></div></div>
+    <div class="card"><h2>地区分布</h2><div class="chart" id="countryChart"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>最近事件明细 <small>最新 50 条</small></h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>时间</th><th>事件</th><th>版本</th><th>人格</th><th>语言</th><th class="num">地区</th><th>URL</th></tr></thead>
+        <tbody id="eventRows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+ * NeuralFin NBTI 数据看板 v1
+ * 数据源:nbtimvp-16.vercel.app/api/stats(与本地 file:// 打开兼容)
+ * ============================================================ */
+const DASH_TOKEN = 'T3VweqWB6xltjA1cWBjM4YuJ'; // 与 Vercel 的 DASH_TOKEN 环境变量保持一致
+const API_BASE = (location.protocol === 'file:') ? 'https://nbtimvp-16.vercel.app' : '';
+
+const EVENT_LABELS = {
+  page_view: '打开网页',
+  test_start: '开始测试',
+  test_completed: '完成测试',
+  share_card_generate_start: '生成分享卡(开始)',
+  share_card_generate_success: '生成分享卡(成功)',
+  share_card_generate_failed: '生成分享卡(失败)',
+  deep_dive_expand_click: '打开深度解读',
+  deep_dive_qrcode_click: '点击 NeuralFin 二维码',
+  deep_dive_preview_view: '深度解读预览',
+  deep_dive_unlock_click: '深度解读解锁',
+  deep_dive_app_open_success: 'App 唤起成功',
+  share_card_click_from_friend: '分享卡归因点击',
+  share_card_generate: '分享卡生成(旧)',
+  share_card_download: '分享卡下载'
+};
+const FUNNEL_STAGES = ['page_view', 'test_start', 'test_completed', 'share_card_generate_success', 'deep_dive_expand_click'];
+
+/* 主题令牌(ECharts 用) — 与 CSS 变量同步 */
+const THEME = {
+  dark:  { page:'#0d0d0d', surface:'#1a1a19', ink:'#ffffff', ink2:'#c3c2b7', muted:'#898781', grid:'#2c2c2a', axis:'#383835', s1:'#3987e5', s2:'#008300', ramp:['#6da7ec','#3987e5','#2a78d6','#256abf','#184f95'] },
+  light: { page:'#f9f9f7', surface:'#fcfcfb', ink:'#0b0b0b', ink2:'#52514e', muted:'#898781', grid:'#e1e0d9', axis:'#c3c2b7', s1:'#2a78d6', s2:'#008300', ramp:['#86b6ef','#6da7ec','#5598e7','#3987e5','#2a78d6'] }
+};
+
+const STATE = { days: 7, from: '', to: '', country: '', event: '', version: '' };
+let lastData = null;
+const charts = {};
+function getChart(id) {
+  if (!charts[id]) {
+    charts[id] = echarts.init($(id));
+    window.addEventListener('resize', () => charts[id] && charts[id].resize());
+  }
+  return charts[id];
+}
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => (n == null ? '—' : Number(n).toLocaleString());
+
+/* ---------- 数据加载 ---------- */
+async function loadData() {
+  $('refreshBtn').disabled = true;
+  document.body.classList.add('loading');
+  const params = new URLSearchParams();
+  if (STATE.days > 0) params.set('days', STATE.days);
+  if (STATE.from) { params.set('from', STATE.from); params.set('to', STATE.to || new Date().toISOString().slice(0,10)); }
+  if (STATE.country) params.set('country', STATE.country);
+  if (STATE.event) params.set('event', STATE.event);
+  if (STATE.version) params.set('version', STATE.version);
+
+  try {
+    const r = await fetch(API_BASE + '/api/stats?' + params, { headers: { 'X-Dash-Token': DASH_TOKEN } });
+    if (r.status === 401) throw new Error('令牌无效:检查 dashboard.html 顶部的 DASH_TOKEN 与 Vercel 的 DASH_TOKEN 是否一致');
+    if (!r.ok) throw new Error('接口错误 HTTP ' + r.status);
+    const data = await r.json();
+    lastData = data;
+    render(data);
+    $('stamp').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
+    hideBanner();
+  } catch (e) {
+    showBanner('加载失败: ' + e.message + (e.message.includes('Failed to fetch') ? '(检查网络或 Vercel 域名可达性)' : ''));
+  } finally {
+    document.body.classList.remove('loading');
+    $('refreshBtn').disabled = false;
+  }
+}
+
+function showBanner(msg) { $('banner').textContent = msg; $('banner').style.display = 'block'; }
+function hideBanner() { $('banner').style.display = 'none'; }
+
+/* ---------- 渲染 ---------- */
+function render(d) {
+  const t = THEME[document.documentElement.dataset.theme || 'dark'];
+  renderKpis(d, t);
+  renderFunnel(d.funnel, t);
+  renderTrend(d.daily, t);
+  renderPersona(d.persona, t);
+  renderCountries(d.countries, t);
+  populateCountrySel(Object.keys(d.countries || {}));
+  loadRecent();
+}
+
+function renderKpis(d, t) {
+  $('kEvents').textContent = fmt(d.total_events);
+  $('kEventsSub').textContent = '范围内全部事件';
+  $('kUsers').textContent = fmt(d.active_users);
+  $('kAllUsers').textContent = fmt(d.all_users);
+  const pv = (d.funnel && d.funnel.page_view) || 0;
+  const done = (d.funnel && d.funnel.test_completed) || 0;
+  $('kRate').textContent = pv > 0 ? (done / pv * 100).toFixed(1) + '%' : '—';
+}
+
+function funnelData(d) {
+  return FUNNEL_STAGES.map((s, i) => {
+    const v = (d && d[s]) || 0;
+    const prev = i > 0 ? (d && d[FUNNEL_STAGES[i-1]]) || 0 : null;
+    return { name: EVENT_LABELS[s] || s, value: v, rate: (prev && prev > 0) ? v / prev : null };
+  });
+}
+
+function renderFunnel(d, t) {
+  const chart = getChart('funnelChart');
+  const rows = funnelData(d).reverse(); // ECharts yAxis 自下而上
+  const labels = rows.map(r => r.name + (r.rate != null ? '  (' + (r.rate * 100).toFixed(0) + '%)' : ''));
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 8, right: 64, top: 8, bottom: 8, containLabel: true },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category', data: labels, inverse: true,
+      axisLine: { show: false }, axisTick: { show: false },
+      axisLabel: { color: t.ink2, fontSize: 12, width: 210, overflow: 'truncate' }
+    },
+    series: [{
+      type: 'bar', barWidth: 18,
+      data: rows.map((r, i) => ({
+        value: r.value,
+        itemStyle: { color: t.ramp[Math.min(i, t.ramp.length - 1)], borderRadius: [0, 4, 4, 0] }
+      })),
+      label: { show: true, position: 'right', color: t.muted, fontSize: 12, formatter: p => fmt(p.value) },
+      tooltip: { formatter: p => p.name.split('  (')[0] + '<br/><b>' + fmt(p.value) + '</b> 次' }
+    }]
+  }, true);
+}
+
+function renderTrend(daily, t) {
+  const chart = getChart('trendChart');
+  const days = (daily || []).map(d => d.day);
+  chart.setOption({
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'axis', backgroundColor: t.surface, borderColor: t.axis, textStyle: { color: t.ink, fontSize: 12 } },
+    legend: { data: ['事件数', '活跃用户'], textStyle: { color: t.ink2, fontSize: 12 }, top: 0 },
+    grid: { left: 8, right: 48, top: 34, bottom: 8, containLabel: true },
+    xAxis: {
+      type: 'category', data: days, boundaryGap: false,
+      axisLine: { lineStyle: { color: t.axis } }, axisTick: { show: false },
+      axisLabel: { color: t.muted, fontSize: 11 }
+    },
+    yAxis: {
+      type: 'value', splitLine: { lineStyle: { color: t.grid } },
+      axisLabel: { color: t.muted, fontSize: 11 }
+    },
+    series: [
+      { name: '事件数', type: 'line', data: (daily || []).map(d => d.events), showSymbol: false, symbolSize: 8,
+        lineStyle: { width: 2, color: t.s1 }, itemStyle: { color: t.s1 }, smooth: false },
+      { name: '活跃用户', type: 'line', data: (daily || []).map(d => d.users), showSymbol: false, symbolSize: 8,
+        lineStyle: { width: 2, color: t.s2 }, itemStyle: { color: t.s2 }, smooth: false }
+    ]
+  }, true);
+}
+
+function renderPersona(persona, t) {
+  const entries = Object.entries(persona || {}).sort((a, b) => b[1] - a[1]);
+  const h = Math.max(300, entries.length * 26 + 60);
+  $('personaChart').style.minHeight = h + 'px';
+  const chart = getChart('personaChart');
+  chart.resize();
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category', data: entries.map(e => e[0]).reverse(),
+      axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.ink2, fontSize: 12 }
+    },
+    series: [{
+      type: 'bar', barWidth: 14,
+      data: entries.map(e => e[1]).reverse(),
+      itemStyle: { color: t.s1, borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: t.muted, fontSize: 12, formatter: p => fmt(p.value) }
+    }]
+  }, true);
+}
+
+function renderCountries(countries, t) {
+  let entries = Object.entries(countries || {}).sort((a, b) => b[1] - a[1]);
+  let other = 0;
+  if (entries.length > 12) {
+    other = entries.slice(12).reduce((s, e) => s + e[1], 0);
+    entries = entries.slice(0, 12);
+    entries.push(['其他', other]);
+  }
+  const h = Math.max(300, entries.length * 26 + 60);
+  $('countryChart').style.minHeight = h + 'px';
+  const chart = getChart('countryChart');
+  chart.resize();
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
+    xAxis: { type: 'value', show: false },
+    yAxis: {
+      type: 'category', data: entries.map(e => e[0]).reverse(),
+      axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: t.ink2, fontSize: 12 }
+    },
+    series: [{
+      type: 'bar', barWidth: 14,
+      data: entries.map(e => e[1]).reverse(),
+      itemStyle: { color: t.s1, borderRadius: [0, 4, 4, 0] },
+      label: { show: true, position: 'right', color: t.muted, fontSize: 12, formatter: p => fmt(p.value) }
+    }]
+  }, true);
+}
+
+function populateCountrySel(countries) {
+  const sel = $('countrySel');
+  const current = sel.value;
+  const known = ['未知', 'CN', 'HK', 'MO', 'TW', 'US', 'SG', 'JP', 'KR', 'GB', 'AU', 'CA', 'DE'];
+  const opts = [...new Set([...known, ...countries])].sort();
+  sel.innerHTML = '<option value="">全部</option>' + opts.map(c => '<option' + (c === current ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+}
+
+async function loadRecent() {
+  try {
+    const r = await fetch(API_BASE + '/api/stats?mode=recent&n=50', { headers: { 'X-Dash-Token': DASH_TOKEN } });
+    if (!r.ok) return;
+    const rows = await r.json();
+    $('eventRows').innerHTML = rows.map(x => '<tr>' +
+      '<td>' + esc(x.ts) + '</td>' +
+      '<td class="ev-name">' + esc(EVENT_LABELS[x.event_name] || x.event_name) + '</td>' +
+      '<td>' + esc(x.test_version || '—') + '</td>' +
+      '<td>' + esc(x.persona_result || '—') + '</td>' +
+      '<td>' + esc(x.lang || '—') + '</td>' +
+      '<td class="num">' + esc(x.country || '—') + '</td>' +
+      '<td class="url" title="' + esc(x.url) + '">' + esc(x.url || '—') + '</td></tr>'
+    ).join('') || '<tr><td colspan="7" style="color:var(--muted)">暂无数据</td></tr>';
+  } catch (e) { /* 明细失败不影响主图 */ }
+}
+
+/* ---------- 过滤交互 ---------- */
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const days = parseInt(btn.dataset.days, 10);
+    STATE.days = days; STATE.from = ''; STATE.to = '';
+    $('fromDate').value = ''; $('toDate').value = '';
+    loadData();
+  });
+});
+$('fromDate').addEventListener('change', () => {
+  STATE.from = $('fromDate').value;
+  if (STATE.from) STATE.days = 0;
+  loadData();
+});
+$('toDate').addEventListener('change', () => { STATE.to = $('toDate').value; if (STATE.to) STATE.days = 0; loadData(); });
+$('countrySel').addEventListener('change', () => { STATE.country = $('countrySel').value; loadData(); });
+$('eventSel').addEventListener('change', () => { STATE.event = $('eventSel').value; loadData(); });
+$('versionSel').addEventListener('change', () => { STATE.version = $('versionSel').value; loadData(); });
+$('refreshBtn').addEventListener('click', loadData);
+$('themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  $('themeBtn').textContent = next === 'dark' ? '🌙 暗色' : '☀️ 亮色';
+  if (lastData) render(lastData);
+});
+
+/* 行为下拉(静态事件列表) */
+$('eventSel').innerHTML = '<option value="">全部</option>' +
+  Object.keys(EVENT_LABELS).map(k => '<option value="' + k + '">' + EVENT_LABELS[k] + '</option>').join('');
+
+/* 首次加载 + 每 5 分钟自动刷新 */
+loadData();
+setInterval(loadData, 300000);
+</script>
+</body>
+</html>
