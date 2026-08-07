@@ -11,12 +11,12 @@
 :root[data-theme="dark"] {
   --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
-  --s1: #3987e5; --s2: #008300; --hover: rgba(255,255,255,0.06); --ok: #0ca30c;
+  --s1: #3987e5; --s1-deep: #1f5fb8; --s2: #008300; --hover: rgba(255,255,255,0.06); --ok: #0ca30c;
 }
 :root[data-theme="light"] {
   --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
-  --s1: #2a78d6; --s2: #008300; --hover: rgba(11,11,11,0.05); --ok: #006300;
+  --s1: #2a78d6; --s1-deep: #1b5aa8; --s2: #008300; --hover: rgba(11,11,11,0.05); --ok: #006300;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--page); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 20px 20px 48px; }
@@ -73,6 +73,29 @@ td.url { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
 /* 刷新时保持旧内容,只降透明度,不跳布局 */
 body.loading .card, body.loading .kpi { opacity: 0.55; }
 body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
+
+/* ---- 漏斗(HTML/CSS 倒三角,文字独立层渲染,保证清晰) ---- */
+.funnel { display: flex; flex-direction: column; gap: 6px; padding: 6px 0 2px; }
+.funnel-row { position: relative; height: 44px; margin: 0 auto; }
+.funnel-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--s1), var(--s1-deep));
+  clip-path: polygon(3% 0, 97% 0, 89% 100%, 11% 100%);
+  border-radius: 3px;
+  transition: filter 0.15s;
+}
+.funnel-row:hover .funnel-bg { filter: brightness(1.18); }
+.funnel-text {
+  position: relative; display: flex; align-items: center;
+  height: 100%; padding: 0 30px; gap: 12px;
+  font-size: 14px; font-weight: 600; color: #ffffff;
+  white-space: nowrap; letter-spacing: 0.2px;
+}
+.funnel-text .f-name { flex: 1; text-align: left; }
+.funnel-text .f-num { font-variant-numeric: tabular-nums; opacity: 0.95; }
+.funnel-text .f-rate { font-weight: 600; font-variant-numeric: tabular-nums; }
+.funnel-text .f-rate.f-up { color: #7ee2a0; }
+.funnel-text .f-rate.f-down { color: #ffd27e; }
 </style>
 </head>
 <body>
@@ -276,39 +299,25 @@ function funnelData(d) {
 }
 
 function renderFunnel(d, t) {
-  const chart = getChart('funnelChart');
   const rows = funnelData(d); /* 业务顺序:打开 → 开始 → 完成 → 分享卡 → 深度解读 */
-  chart.setOption({
-    backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'item',
-      backgroundColor: t.surface, borderColor: t.axis, textStyle: { color: t.ink, fontSize: 12 },
-      formatter: p => {
-        const r = p.data;
-        let s = '<b>' + esc(r.name) + '</b><br/>' + fmt(r.value) + ' 人';
-        if (r.rate != null) s += '<br/>较上一步: ' + (r.rate * 100).toFixed(0) + '%';
-        if (r.rate0 != null) s += '<br/>较打开网页: ' + (r.rate0 * 100).toFixed(0) + '%';
-        return s;
-      }
-    },
-    series: [{
-      type: 'funnel', sort: 'none', gap: 3, funnelAlign: 'center',
-      left: 10, right: 64, top: 10, bottom: 10,
-      minSize: '12%', maxSize: '100%',
-      label: {
-        show: true, position: 'inside', fontSize: 12, lineHeight: 17,
-        /* 浅色块用深字、深色块用白字,保证可读 */
-        color: p => p.dataIndex < 2 ? '#0b0b0b' : '#ffffff',
-        formatter: p => p.name + '\n' + fmt(p.value) + (p.data.rate != null ? '  ↓' + (p.data.rate * 100).toFixed(0) + '%' : '')
-      },
-      labelLine: { show: false },
-      itemStyle: { borderColor: t.surface, borderWidth: 2 },
-      data: rows.map((r, i) => ({
-        name: r.name, value: r.value, rate: r.rate, rate0: r.rate0,
-        itemStyle: { color: t.ramp[Math.min(i, t.ramp.length - 1)] }
-      }))
-    }]
-  }, true);
+  const max = Math.max.apply(null, rows.map(r => r.value).concat([1]));
+  const el = $('funnelChart');
+  el.innerHTML = '<div class="funnel">' + rows.map(r => {
+    /* 宽度按人数比例递减,最小 36% 保证可读;悬停 title 显示完整转化信息 */
+    const w = Math.max(r.value / max * 100, 36);
+    const title = r.name + ': ' + fmt(r.value) + ' 人' +
+      (r.rate != null ? ' · 较上一步 ' + (r.rate * 100).toFixed(0) + '%' : '') +
+      (r.rate0 != null ? ' · 较打开网页 ' + (r.rate0 * 100).toFixed(0) + '%' : '');
+    const rateCls = r.rate == null ? '' : (r.rate >= 1 ? ' f-up' : ' f-down');
+    const rateTxt = r.rate == null ? '' : '↓' + (r.rate * 100).toFixed(0) + '%';
+    return '<div class="funnel-row" title="' + esc(title) + '" style="width:' + w + '%">' +
+      '<div class="funnel-bg"></div>' +
+      '<div class="funnel-text">' +
+        '<span class="f-name">' + esc(r.name) + '</span>' +
+        '<span class="f-num">' + fmt(r.value) + ' 人</span>' +
+        '<span class="f-rate' + rateCls + '">' + rateTxt + '</span>' +
+      '</div></div>';
+  }).join('') + '</div>';
 }
 
 function renderTrend(daily, t) {
