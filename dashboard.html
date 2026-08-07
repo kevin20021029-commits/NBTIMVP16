@@ -74,28 +74,30 @@ td.url { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
 body.loading .card, body.loading .kpi { opacity: 0.55; }
 body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
 
-/* ---- 漏斗(HTML/CSS 倒三角,文字独立层渲染,保证清晰) ---- */
-.funnel { display: flex; flex-direction: column; gap: 6px; padding: 6px 0 2px; }
-.funnel-row { position: relative; height: 44px; margin: 0 auto; }
+/* ---- 漏斗(HTML/CSS 倒三角:梯形居左按真实比例递减,文字居右独立区,任何宽度都清晰) ---- */
+.funnel { display: flex; flex-direction: column; gap: 7px; padding: 6px 0 2px; }
+.funnel-row { display: flex; align-items: center; gap: 14px; height: 44px; }
 .funnel-bg {
-  position: absolute; inset: 0;
+  height: 100%; flex-shrink: 0; width: var(--w, 100%);
   background: linear-gradient(180deg, var(--s1), var(--s1-deep));
-  clip-path: polygon(3% 0, 97% 0, 89% 100%, 11% 100%);
+  clip-path: polygon(6% 0, 94% 0, 85% 100%, 15% 100%);
   border-radius: 3px;
   transition: filter 0.15s;
 }
 .funnel-row:hover .funnel-bg { filter: brightness(1.18); }
 .funnel-text {
-  position: relative; display: flex; align-items: center;
-  height: 100%; padding: 0 30px; gap: 12px;
-  font-size: 14px; font-weight: 600; color: #ffffff;
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; font-weight: 600; color: var(--ink);
   white-space: nowrap; letter-spacing: 0.2px;
 }
-.funnel-text .f-name { flex: 1; min-width: 0; text-align: left; }
-.funnel-text .f-num { font-variant-numeric: tabular-nums; opacity: 0.95; }
+.funnel-text .f-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.funnel-text .f-num { font-variant-numeric: tabular-nums; opacity: 0.95; color: var(--ink); }
 .funnel-text .f-rate { font-weight: 600; font-variant-numeric: tabular-nums; }
-.funnel-text .f-rate.f-up { color: #7ee2a0; }
-.funnel-text .f-rate.f-down { color: #ffd27e; }
+:root[data-theme="dark"] .f-rate.f-up { color: #7ee2a0; }
+:root[data-theme="dark"] .f-rate.f-down { color: #ffd27e; }
+:root[data-theme="light"] .f-rate.f-up { color: #1d8a44; }
+:root[data-theme="light"] .f-rate.f-down { color: #c07a12; }
 
 /* ---- 移动端适配(≤900px 平板 / ≤560px 手机) ---- */
 @media (max-width: 900px) {
@@ -107,10 +109,9 @@ body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
   .kpi { padding: 10px 12px; }
   .kpi .k-value { font-size: 24px; }
   .chart.tall { min-height: 260px; }
-  /* 漏斗:缩小行高/字号/留白,名称可截断,避免窄屏溢出 */
-  .funnel-row { height: 38px; }
-  .funnel-text { padding: 0 16px; gap: 8px; font-size: 12px; }
-  .funnel-text .f-name { overflow: hidden; text-overflow: ellipsis; }
+  /* 漏斗:行高/字号/间距收紧,名称可截断 */
+  .funnel-row { height: 38px; gap: 10px; }
+  .funnel-text { gap: 8px; font-size: 12px; }
   #themeBtn { font-size: 12px; padding: 5px 10px; }
 }
 @media (max-width: 560px) {
@@ -122,9 +123,8 @@ body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
   .card h2 { font-size: 13px; }
   .filters .group { width: 100%; }
   select, input[type="date"] { font-size: 12px; max-width: 100%; }
-  /* 漏斗 4 级宽名称也不溢出 */
-  .funnel-row { height: 36px; }
-  .funnel-text { padding: 0 12px; gap: 6px; font-size: 11.5px; }
+  .funnel-row { height: 36px; gap: 8px; }
+  .funnel-text { gap: 6px; font-size: 11.5px; }
 }
 </style>
 </head>
@@ -333,15 +333,15 @@ function renderFunnel(d, t) {
   const max = Math.max.apply(null, rows.map(r => r.value).concat([1]));
   const el = $('funnelChart');
   el.innerHTML = '<div class="funnel">' + rows.map(r => {
-    /* 宽度按人数比例递减,最小 36% 保证可读;悬停 title 显示完整转化信息 */
-    const w = Math.max(r.value / max * 100, 36);
+    /* 梯形宽度按人数比例真实递减(下限 8% 保形状);文字在独立区,不随宽度缩小 */
+    const w = Math.max(r.value / max * 100, 8);
     const title = r.name + ': ' + fmt(r.value) + ' 人' +
       (r.rate != null ? ' · 较上一步 ' + (r.rate * 100).toFixed(0) + '%' : '') +
       (r.rate0 != null ? ' · 较打开网页 ' + (r.rate0 * 100).toFixed(0) + '%' : '');
     const rateCls = r.rate == null ? '' : (r.rate >= 1 ? ' f-up' : ' f-down');
     const rateTxt = r.rate == null ? '' : '↓' + (r.rate * 100).toFixed(0) + '%';
-    return '<div class="funnel-row" title="' + esc(title) + '" style="width:' + w + '%">' +
-      '<div class="funnel-bg"></div>' +
+    return '<div class="funnel-row" title="' + esc(title) + '">' +
+      '<div class="funnel-bg" style="--w:' + w + '%"></div>' +
       '<div class="funnel-text">' +
         '<span class="f-name">' + esc(r.name) + '</span>' +
         '<span class="f-num">' + fmt(r.value) + ' 人</span>' +
