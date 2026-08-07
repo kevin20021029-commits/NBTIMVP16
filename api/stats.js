@@ -56,12 +56,31 @@ module.exports = async function handler(req, res) {
     return res.json(data);
   }
 
+  /* mode=times:时长与参与度(G5,零新埋点:基于 test_progress.perQuestionMs[] + 事件时间差) */
+  if (req.query.mode === 'times') {
+    const { data, error } = await supabase.rpc('dash_times', {
+      t_from,
+      t_to,
+      f_version: req.query.version || null,
+      f_lang: req.query.lang || null,
+      f_country: req.query.country || null,
+      f_ua: req.query.ua || null
+    });
+    if (error) {
+      setCORS(res);
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+    setCORS(res);
+    return res.json(data);
+  }
+
   const { data, error } = await supabase.rpc('dash_stats', {
     t_from,
     t_to,
     f_country: req.query.country || null,
     f_event: req.query.event || null,
-    f_version: req.query.version || null
+    f_version: req.query.version || null,
+    f_excl_speed: req.query.excl_speed === '1'
   });
 
   if (error) {
