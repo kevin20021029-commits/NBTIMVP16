@@ -149,7 +149,9 @@ body.loading .kpis, body.loading .grid { transition: opacity 0.15s; }
  * NeuralFin NBTI 数据看板 v1
  * 数据源:nbtimvp-16.vercel.app/api/stats(与本地 file:// 打开兼容)
  * ============================================================ */
-const DASH_TOKEN = 'T3VweqWB6xltjA1cWBjM4YuJ'; // 与 Vercel 的 DASH_TOKEN 环境变量保持一致
+/* 令牌从 URL ?token= 读取——勿硬编码进公开文件(任何人可查看页面源码拿到令牌)。
+ * 打开方式: https://nbtimvp-16.vercel.app/dashboard.html?token=你的DASH_TOKEN */
+const DASH_TOKEN = (new URLSearchParams(location.search)).get('token') || '';
 const API_BASE = (location.protocol === 'file:') ? 'https://nbtimvp-16.vercel.app' : '';
 
 const EVENT_LABELS = {
@@ -192,11 +194,20 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp
 const fmt = n => (n == null ? '—' : Number(n).toLocaleString());
 
 /* ---------- 数据加载 ---------- */
+let loadSeq = 0; /* 并发请求序号:丢弃过期响应,防止旧请求晚到覆盖新数据 */
 async function loadData() {
+  const seq = ++loadSeq;
   $('refreshBtn').disabled = true;
   document.body.classList.add('loading');
+  if (!DASH_TOKEN) {
+    showBanner('缺少令牌:请在 URL 后加 ?token=你的DASH_TOKEN 打开本看板');
+    document.body.classList.remove('loading');
+    $('refreshBtn').disabled = false;
+    return;
+  }
   const params = new URLSearchParams();
   if (STATE.days > 0) params.set('days', STATE.days);
+  else params.set('from', '2020-01-01'); /* 「全部」:走 from/to 路径,避免服务端默认 30 天 */
   if (STATE.from) { params.set('from', STATE.from); params.set('to', STATE.to || new Date().toISOString().slice(0,10)); }
   if (STATE.country) params.set('country', STATE.country);
   if (STATE.event) params.set('event', STATE.event);
@@ -204,9 +215,10 @@ async function loadData() {
 
   try {
     const r = await fetch(API_BASE + '/api/stats?' + params, { headers: { 'X-Dash-Token': DASH_TOKEN } });
-    if (r.status === 401) throw new Error('令牌无效:检查 dashboard.html 顶部的 DASH_TOKEN 与 Vercel 的 DASH_TOKEN 是否一致');
+    if (r.status === 401) throw new Error('令牌无效:确认 URL 上的 ?token= 与 Vercel 的 DASH_TOKEN 环境变量一致');
     if (!r.ok) throw new Error('接口错误 HTTP ' + r.status);
     const data = await r.json();
+    if (seq !== loadSeq) return; /* 过期响应:丢弃,避免覆盖较新的数据 */
     lastData = data;
     render(data);
     $('stamp').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
