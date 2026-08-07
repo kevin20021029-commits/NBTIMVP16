@@ -620,6 +620,8 @@ function fmtDurationAxis(v) {
   return s >= 60 ? Math.round(s / 60) + 'm' : s + 's';
 }
 function renderEngage(times, t) {
+  /* 防御:参与度 DOM 缺失(如被旧版文件覆盖)时跳过,不让主页面挂掉 */
+  if (!$('kDur16') || !$('viewEngage') || !$('exclSpeed')) return;
   const tm = times || {};
   const totals = tm.total_ms || {};
   const v16 = totals['16题版'], v48 = totals['48题版'];
