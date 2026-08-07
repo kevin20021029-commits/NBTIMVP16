@@ -232,6 +232,35 @@ td.url { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:n
 }
 .empty button:hover { border-color:var(--accent); }
 
+/* ============ Tab 切换 ============ */
+.tabs {
+  display:flex; gap:8px; padding:12px 24px 0;
+}
+.tabs button {
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  border-radius:9px 9px 0 0; padding:8px 20px; font-size:13px; font-weight:500;
+  cursor:pointer; font-family:inherit; transition:.15s; border-bottom:none;
+}
+.tabs button[aria-selected="true"] {
+  color:var(--text); background:var(--surface); border-color:var(--border);
+  box-shadow:0 -1px 4px rgba(0,0,0,.06); position:relative;
+}
+.tabs button[aria-selected="true"]::after {
+  content:''; position:absolute; left:0; right:0; bottom:-1px; height:1px; background:var(--surface);
+}
+.tabs button:hover { color:var(--text); }
+.tab-body { display:none; }
+.tab-body.active { display:block; }
+@media (max-width:560px) { .tabs { padding:10px 14px 0; } .tabs button { padding:7px 14px; font-size:12px; } }
+
+/* 参与度 KPI 行 */
+.kpi-grid.engage { grid-template-columns:repeat(4,1fr); padding-top:0; }
+.kpi-sm .kpi-value { font-size:24px; }
+.kpi .badge.small { font-size:10px; padding:2px 6px; }
+.insuff { color:var(--text-3); font-size:11px; margin-left:6px; }
+.switch-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-2); padding:2px 0; }
+.switch-row input { accent-color:var(--accent); width:16px; height:16px; cursor:pointer; }
+
 /* ============ embed 模式 ============ */
 body.embed .topbar, body.embed .filters { display:none; }
 body.embed .kpi-grid { padding-top:16px; }
@@ -299,6 +328,12 @@ body.embed .kpi-grid { padding-top:16px; }
   <button id="refreshBtn"><span class="spin-ico">↻</span> 刷新</button>
 </div>
 
+<div class="tabs">
+  <button id="tabOverview" aria-selected="true">总览</button>
+  <button id="tabEngage">参与度</button>
+</div>
+
+<div class="tab-body active" id="viewOverview">
 <div class="kpi-grid">
   <div class="kpi">
     <div class="kpi-top"><span class="kpi-label">总行为</span><span class="badge flat" id="bEvents">—</span></div>
@@ -366,6 +401,69 @@ body.embed .kpi-grid { padding-top:16px; }
     </div>
   </div>
 </div>
+</div><!-- /viewOverview -->
+
+<!-- ============ 参与度视图(G5) ============ -->
+<div class="tab-body" id="viewEngage">
+  <div class="kpi-grid engage">
+    <div class="kpi kpi-sm">
+      <div class="kpi-top"><span class="kpi-label">16题版答题中位时长</span></div>
+      <div class="kpi-value num" id="kDur16">—</div>
+      <div class="kpi-sub" id="kDur16Sub">P95 <span class="num" id="kDur16P95">—</span> · 样本不足</div>
+    </div>
+    <div class="kpi kpi-sm">
+      <div class="kpi-top"><span class="kpi-label">48题版答题中位时长</span></div>
+      <div class="kpi-value num" id="kDur48">—</div>
+      <div class="kpi-sub" id="kDur48Sub">P95 <span class="num" id="kDur48P95">—</span></div>
+    </div>
+    <div class="kpi kpi-sm">
+      <div class="kpi-top"><span class="kpi-label">speedrun 乱点占比</span><span class="badge small flat" id="bSpeed">—</span></div>
+      <div class="kpi-value num" id="kSpeed">—</div>
+      <div class="kpi-sub" id="kSpeedSub">单题 &lt;800ms 占 &gt;70%</div>
+    </div>
+    <div class="kpi kpi-sm">
+      <div class="kpi-top"><span class="kpi-label">结果页中位停留</span></div>
+      <div class="kpi-value num" id="kResult">—</div>
+      <div class="kpi-sub" id="kResultSub">完成 → 分享卡/深度解读</div>
+    </div>
+  </div>
+
+  <div class="switch-row" style="padding:0 24px 12px">
+    <input type="checkbox" id="exclSpeed">
+    <label for="exclSpeed">排除 speedrun 用户(让完成率/人格分布更可信)</label>
+    <span style="color:var(--text-3);font-size:12px" id="speedNote"></span>
+  </div>
+
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-hd">
+        <h3>单题耗时</h3>
+        <span class="hint" id="perQHint">P50 中位 · 16题版</span>
+      </div>
+      <div class="card-bd"><div id="perQChart" style="height:280px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd">
+        <h3>逐题流失 × 耗时</h3>
+        <span class="hint" id="dropHint">左轴流失率 · 右轴中位耗时</span>
+      </div>
+      <div class="card-bd"><div id="dropChart" style="height:280px"></div></div>
+    </div>
+  </div>
+
+  <div class="grid-sub">
+    <div class="card">
+      <div class="card-hd"><h3>答题总时长分布</h3><span class="hint" id="distHint">P25/P50/P75/P95 · 16题版</span></div>
+      <div class="card-bd"><div id="distChart" style="height:260px"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><h3>阶段时长</h3><span class="hint">P50 / P95</span></div>
+      <div class="card-bd">
+        <div class="rank" id="stageRank"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 'use strict';
@@ -417,7 +515,7 @@ const THEME = {
 };
 
 const STATE = { days:7, from:'', to:'', country:'', event:'', version:'' };
-let lastData = null, lastPrev = null, trendChart = null;
+let lastData = null, lastPrev = null, lastTimes = null, trendChart = null, engageCharts = {};
 let loadSeq = 0;
 
 const $ = id => document.getElementById(id);
@@ -459,13 +557,19 @@ async function loadData() {
   try {
     const mainP = buildParams(STATE);
     const prevP = (STATE.days > 0) ? buildParams(STATE, true) : null;
-    const [data, prev] = await Promise.all([
+    const excl = $('exclSpeed').checked;
+    if (excl) mainP.set('excl_speed', '1');
+    if (excl && prevP) prevP.set('excl_speed', '1');
+    const timesP = buildParams(STATE);
+    timesP.set('mode', 'times'); /* dash_times 无 excl_speed 参数,speedrun 占比保持全量口径 */
+    const [data, prev, times] = await Promise.all([
       fetchStats(mainP),
-      prevP ? fetchStats(prevP).catch(() => null) : Promise.resolve(null)
+      prevP ? fetchStats(prevP).catch(() => null) : Promise.resolve(null),
+      fetchStats(timesP).catch(() => null)
     ]);
     if (seq !== loadSeq) return;
-    lastData = data; lastPrev = prev;
-    render(data, prev);
+    lastData = data; lastPrev = prev; lastTimes = times;
+    render(data, prev, times);
     $('stamp').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', { hour12:false });
     hideBanner();
   } catch (e) {
@@ -479,7 +583,7 @@ function showBanner(msg) { $('banner').textContent = msg; $('banner').style.disp
 function hideBanner() { $('banner').style.display = 'none'; }
 
 /* ---------- 渲染 ---------- */
-function render(d, prev) {
+function render(d, prev, times) {
   const t = THEME[document.documentElement.dataset.theme || 'dark'];
   const daily = normalizeDaily(d.daily);
   renderKpis(d, prev, daily, t);
@@ -489,9 +593,117 @@ function render(d, prev) {
   renderCountries(d.countries);
   populateCountrySel(Object.keys(d.countries || {}));
   loadRecent();
+  renderEngage(times, t);
   const pv = (d.funnel && d.funnel.page_view) || 0;
   const done = (d.funnel && d.funnel.test_completed) || 0;
   document.title = (pv > 0 ? '(' + (done / pv * 100).toFixed(1) + '%) ' : '') + 'NBTI 看板';
+}
+
+/* ---------- 参与度渲染(G5) ---------- */
+function fmtMs(ms) {
+  if (ms == null) return '—';
+  const s = ms / 1000;
+  return s >= 60 ? (s / 60).toFixed(1) + ' 分钟' : s.toFixed(1) + ' 秒';
+}
+function getEngageChart(id) {
+  if (!engageCharts[id]) {
+    engageCharts[id] = echarts.init($(id));
+    window.addEventListener('resize', () => engageCharts[id] && engageCharts[id].resize());
+  }
+  return engageCharts[id];
+}
+function fmtDurationAxis(v) {
+  if (v == null) return '';
+  const s = Math.round(v / 1000);
+  return s >= 60 ? Math.round(s / 60) + 'm' : s + 's';
+}
+function renderEngage(times, t) {
+  const tm = times || {};
+  const totals = tm.total_ms || {};
+  const v16 = totals['16题版'], v48 = totals['48题版'];
+  /* KPI:16/48 中位时长 */
+  $('kDur16').textContent = v16 ? fmtMs(v16.p50) : '—';
+  $('kDur16P95').textContent = v16 ? fmtMs(v16.p95) : '—';
+  $('kDur16Sub').textContent = 'P95 ' + (v16 ? fmtMs(v16.p95) : '—') + (v16 && v16.n < 30 ? ' · ⚠样本不足(n=' + v16.n + ')' : '');
+  $('kDur48').textContent = v48 ? fmtMs(v48.p50) : '—';
+  $('kDur48P95').textContent = v48 ? fmtMs(v48.p95) : '—';
+  $('kDur48Sub').textContent = 'P95 ' + (v48 ? fmtMs(v48.p95) : '—') + (v48 && v48.n < 30 ? ' · ⚠样本不足(n=' + v48.n + ')' : '');
+  /* speedrun */
+  const sp = tm.speedrun || {};
+  $('kSpeed').textContent = sp.total ? sp.pct + '%' : '—';
+  $('bSpeed').textContent = sp.total ? sp.n + '/' + sp.total + ' 人' : '';
+  $('speedNote').textContent = sp.total && sp.total < 30 ? '⚠ 样本不足(n=' + sp.total + ')' : '';
+  /* 结果页停留 */
+  const st = tm.stages || {};
+  const res = st.complete_to_card;
+  $('kResult').textContent = res ? fmtMs(res.p50) : '—';
+  $('kResultSub').textContent = 'P50 ' + (res ? fmtMs(res.p50) : '—') + (res && res.n < 30 ? ' · ⚠样本不足(n=' + res.n + ')' : '');
+  /* 单题耗时(P50) */
+  const perq16 = (tm.per_question || []).filter(x => x.ver === '16题版');
+  const perq48 = (tm.per_question || []).filter(x => x.ver === '48题版');
+  const perq = perq16.length ? perq16 : perq48;
+  $('perQHint').textContent = 'P50 中位 · ' + (perq16.length ? '16题版' : '48题版') + (perq.length && perq[0].n < 30 ? ' · ⚠样本不足' : '');
+  getEngageChart('perQChart').setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'axis', backgroundColor:t.surface, borderColor:t.axis, textStyle:{ color:t.ink, fontSize:12 },
+      formatter: ps => { const p = ps[0]; return p.name + '<br/>中位耗时: <b>' + fmtDurationAxis(p.value) + '</b>' + (p.data && p.data.n != null ? ' · n=' + p.data.n : ''); } },
+    grid:{ left:8, right:48, top:24, bottom:8, containLabel:true },
+    xAxis:{ type:'category', data:perq.map(x => '第' + x.q + '题'),
+      axisLine:{ lineStyle:{ color:t.axis } }, axisTick:{ show:false }, axisLabel:{ color:t.muted, fontSize:11, interval:0, rotate:perq.length > 12 ? 45 : 0 } },
+    yAxis:{ type:'value', name:'毫秒', nameTextStyle:{ color:t.muted }, splitLine:{ lineStyle:{ color:t.grid } }, axisLabel:{ color:t.muted, fontSize:11 } },
+    series:[{ type:'bar', data:perq.map(x => ({ value: x.p50, n: x.n })),
+      itemStyle:{ color:t.s1, borderRadius:[3,3,0,0] },
+      label:{ show:true, position:'top', color:t.muted, fontSize:10, formatter:p => fmtDurationAxis(p.value) } }]
+  }, true);
+  /* 逐题流失 × 耗时 双轴 */
+  const dropY = perq.length ? perq16.length ? perq16 : perq48 : [];
+  getEngageChart('dropChart').setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'axis', backgroundColor:t.surface, borderColor:t.axis, textStyle:{ color:t.ink, fontSize:12 } },
+    legend:{ data:['流失率','中位耗时'], textStyle:{ color:t.ink2, fontSize:12 }, top:0, right:0, icon:'circle', itemWidth:8, itemHeight:8 },
+    grid:{ left:8, right:48, top:32, bottom:8, containLabel:true },
+    xAxis:{ type:'category', data:dropY.map(x => '第' + x.q + '题'),
+      axisLine:{ lineStyle:{ color:t.axis } }, axisTick:{ show:false }, axisLabel:{ color:t.muted, fontSize:11, interval:0, rotate:dropY.length > 12 ? 45 : 0 } },
+    yAxis:[
+      { type:'value', name:'流失率%', nameTextStyle:{ color:t.muted }, max:100,
+        splitLine:{ lineStyle:{ color:t.grid } }, axisLabel:{ color:t.muted, fontSize:11 } },
+      { type:'value', name:'毫秒', nameTextStyle:{ color:t.muted },
+        splitLine:{ show:false }, axisLabel:{ color:t.muted, fontSize:11 } }
+    ],
+    series:[
+      { name:'流失率', type:'line', data:dropY.map(x => x.drop_pct), yAxisIndex:0,
+        showSymbol:true, symbolSize:6, lineStyle:{ width:2, color:t.s2 }, itemStyle:{ color:t.s2 } },
+      { name:'中位耗时', type:'bar', data:dropY.map(x => x.p50), yAxisIndex:1,
+        itemStyle:{ color:t.s1 + '99', borderRadius:[3,3,0,0] } }
+    ]
+  }, true);
+  /* 时长分布 P25-P95 */
+  const dist = perq16.length ? v16 : v48;
+  $('distHint').textContent = 'P25/P50/P75/P95 · ' + (perq16.length ? '16题版' : '48题版') + (dist && dist.n < 30 ? ' · ⚠样本不足' : '');
+  getEngageChart('distChart').setOption({
+    backgroundColor:'transparent',
+    tooltip:{ trigger:'axis', backgroundColor:t.surface, borderColor:t.axis, textStyle:{ color:t.ink, fontSize:12 } },
+    grid:{ left:8, right:48, top:24, bottom:8, containLabel:true },
+    xAxis:{ type:'category', data:['P25','P50','P75','P95'],
+      axisLine:{ lineStyle:{ color:t.axis } }, axisTick:{ show:false }, axisLabel:{ color:t.muted, fontSize:11 } },
+    yAxis:{ type:'value', name:'毫秒', nameTextStyle:{ color:t.muted }, splitLine:{ lineStyle:{ color:t.grid } }, axisLabel:{ color:t.muted, fontSize:11 } },
+    series:[{ type:'bar', data:dist ? [dist.p25, dist.p50, dist.p75, dist.p95] : [],
+      itemStyle:{ color:t.s1, borderRadius:[3,3,0,0] },
+      label:{ show:true, position:'top', color:t.muted, fontSize:10, formatter:p => fmtDurationAxis(p.value) } }]
+  }, true);
+  /* 阶段时长排行 */
+  const stages = [
+    { name:'落地 → 点开始(决策)', v: st.landing_to_start },
+    { name:'完成 → 分享/深度解读(结果页)', v: res }
+  ];
+  $('stageRank').innerHTML = '<div class="rank">' + stages.map(s => {
+    const v = s.v;
+    return '<div class="rank-row">' +
+      '<span class="code">' + esc(s.name) + '</span>' +
+      '<span class="track"><span class="fill" style="width:' + (v ? Math.min(v.p50 / 600000 * 100, 100) : 0) + '%"></span></span>' +
+      '<span class="val num">' + (v ? fmtMs(v.p50) : '—') + '</span></div>' +
+      (v && v.n < 30 ? '<div class="fdrop">⚠ 样本不足(n=' + v.n + ') · P95 ' + fmtMs(v.p95) + '</div>' : '');
+  }).join('') + '</div>';
 }
 /* 补零:填充范围内无事件的日期(仅 ≤90 天),供趋势图和 sparkline 共用 */
 function normalizeDaily(daily) {
@@ -702,6 +914,20 @@ $('toDate').addEventListener('change', () => {
 $('countrySel').addEventListener('change', () => { STATE.country = $('countrySel').value; loadData(); });
 $('eventSel').addEventListener('change', () => { STATE.event = $('eventSel').value; loadData(); });
 $('refreshBtn').addEventListener('click', loadData);
+
+/* Tab 切换:总览 / 参与度 */
+const TABS = [['tabOverview', 'viewOverview'], ['tabEngage', 'viewEngage']];
+TABS.forEach(([tabId, viewId]) => {
+  $(tabId).addEventListener('click', () => {
+    TABS.forEach(([t2, v2]) => {
+      $(t2).setAttribute('aria-selected', String(t2 === tabId));
+      $(v2).classList.toggle('active', v2 === viewId);
+    });
+    if (viewId === 'viewEngage') setTimeout(() => Object.values(engageCharts).forEach(c => c.resize()), 50);
+  });
+});
+/* speedrun 排除开关:勾选后重载(总览漏斗/人格/KPI 同步排除) */
+$('exclSpeed').addEventListener('change', loadData);
 
 /* 主题:记忆选择 > 系统偏好 */
 function applyTheme(theme) {
