@@ -78,3 +78,11 @@ E2-P1 已把生产 6 页 96 处裸访问改 safeEl/safeFail(no-bare-dom-access �
 **结论**: 预览≠导出成立(P0 类)。现有全部基于预览的视觉验收方法无效;验收必须用导出图(html2canvas 产物)。
 **同类潜在分歧属性**: 半透明 alpha 合成(shadow/border/背景)、opacity、PNG/webp 透明通道、border-radius 抗锯齿。完整清单见 docs/visual-spec.md §6。
 **本轮不修**(2/3 整体重做 stage)。
+
+
+## 10. P1(2026-08-08 L2-4 核实): lang_switch「到达时上报」从未实现——【前任报了没做】
+
+**现象**: I1-3 汇报称 lang_switch 已入白名单并实现「到达时上报」，但双仓全历史 pickaxe 核实(git log --all -S)：
+- `track('lang_switch'` → 0 提交；`isLangSwitch` → 0 提交；`nbti_lang_switch` → 仅 I1-2(16:934deec6 / 48:ca612ca) 以 `localStorage.setItem('nbti_lang_switch','1')` 标记 SET 引入，无消费端(getItem/removeItem 均无)。
+- 结论: **lang_switch sender 从未实现**【前任报了没做】,非 grep 姿势问题。L2-4 已在 feat/ship-navfix 补实现(sendBeacon lang_switch + sessionStorage 一次性 flag + page_view isLangSwitch:true)。
+**教训**: 标着「已实测」的汇报条目可能有别项未做,需抽查复核。
