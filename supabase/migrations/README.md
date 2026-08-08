@@ -7,12 +7,12 @@ Dashboard 数据管线依赖以下 Supabase RPC（被 `api/stats.js` 调用）�
 | RPC | 调用点 | 状态 |
 | --- | --- | --- |
 | `dash_stats` | `api/stats.js` 主查询（funnel/persona/daily/countries/KPI） | **真定义已入库**（用户提供，含 speed_ids/excl_speed） |
-| `dash_times` | `api/stats.js?mode=times`（8 个耗时卡片数据源） | 签名/返回契约已实证；**SQL 体仍未获得**（用户提供的是两个 dash_stats 版本） |
+| `dash_times` | `api/stats.js?mode=times`（8 个耗时卡片数据源） | **真定义已入库**（用户提供） |
 | `dash_recent` | `api/stats.js?mode=recent`（明细表） | 存在已确认（OpenAPI spec）；未入库，同风险 |
 
-**获取 SQL 体受阻说明**：service key 走 PostgREST 只能验证签名与调用（pg_get_functiondef 不可执行）；Management API 需独立 `sbp_` 令牌；pg-meta 内部端点未对公网暴露（404）。补齐 dash_times SQL 体需任一：用户控制台复制 dash_times 定义、Management API PAT(sbp_)+项目 ref、或 DB 连接串/密码。
+**获取 SQL 体受阻说明**：service key 走 PostgREST 只能验证签名与调用（pg_get_functiondef 不可执行）；Management API 需独立 `sbp_` 令牌；pg-meta 内部端点未对公网暴露（404）。dash_stats/dash_times 真定义均已由用户控制台复制提供并整合。
 
-**用户提供文件存档**：`incoming/dash_stats_block1.sql`（当前 dash_stats，含 speed 过滤，已整合进本迁移）；`incoming/dash_stats_block2.sql`（无 speed 过滤的旧版 dash_stats，历史参考，未建为函数）。
+**用户提供文件存档**：`incoming/dash_stats_block1.sql`（当前 dash_stats，含 speed 过滤，已整合）；`incoming/dash_stats_block2.sql`（无 speed 过滤的旧版 dash_stats，历史参考，未建为函数）；`incoming/dash_times_real.sql`（dash_times，已整合）。
 
 ## 如何补全真定义
 
