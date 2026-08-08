@@ -409,12 +409,12 @@ body.embed .kpi-grid { padding-top:16px; }
     <div class="kpi kpi-sm">
       <div class="kpi-top"><span class="kpi-label">16题版答题中位时长</span></div>
       <div class="kpi-value num" id="kDur16">—</div>
-      <div class="kpi-sub" id="kDur16Sub">P95 <span class="num" id="kDur16P95">—</span> · 样本不足</div>
+      <div class="kpi-sub" id="kDur16Sub">P95 <span class="num" id="kDur16P95">—</span><span class="kpi-warn" id="kDur16Warn"> · 样本不足</span></div>
     </div>
     <div class="kpi kpi-sm">
       <div class="kpi-top"><span class="kpi-label">48题版答题中位时长</span></div>
       <div class="kpi-value num" id="kDur48">—</div>
-      <div class="kpi-sub" id="kDur48Sub">P95 <span class="num" id="kDur48P95">—</span></div>
+      <div class="kpi-sub" id="kDur48Sub">P95 <span class="num" id="kDur48P95">—</span><span class="kpi-warn" id="kDur48Warn"></span></div>
     </div>
     <div class="kpi kpi-sm">
       <div class="kpi-top"><span class="kpi-label">speedrun 乱点占比</span><span class="badge small flat" id="bSpeed">—</span></div>
@@ -620,18 +620,25 @@ function fmtDurationAxis(v) {
   return s >= 60 ? Math.round(s / 60) + 'm' : s + 's';
 }
 function renderEngage(times, t) {
-  /* 防御:参与度 DOM 缺失(如被旧版文件覆盖)时跳过,不让主页面挂掉 */
-  if (!$('kDur16') || !$('viewEngage') || !$('exclSpeed')) return;
+  /* 防御:参与度 DOM 任一元素缺失(如被旧版文件覆盖/部署竞态)时整体跳过,不让主页面挂掉。
+     c80deeb 的 guard 只查了 3 个元素,漏掉 kDur16P95 等其余 14 个——此处补齐全量清单。
+     注:kDur16Sub/kDur48Sub 不能整体 textContent 覆写(会连带删掉内部的 P95 span),故把
+     P95 数值与「样本不足」提示拆成两个独立元素分别更新。 */
+  const engageIds = ['kDur16','kDur16P95','kDur16Warn','kDur16Sub','kDur48','kDur48P95','kDur48Warn','kDur48Sub',
+    'kSpeed','bSpeed','speedNote','kResult','kResultSub','perQHint',
+    'perQChart','dropChart','distHint','distChart','stageRank','exclSpeed','viewEngage'];
+  if (engageIds.some(id => !$(id))) return;
+  try {
   const tm = times || {};
   const totals = tm.total_ms || {};
   const v16 = totals['16题版'], v48 = totals['48题版'];
   /* KPI:16/48 中位时长 */
   $('kDur16').textContent = v16 ? fmtMs(v16.p50) : '—';
   $('kDur16P95').textContent = v16 ? fmtMs(v16.p95) : '—';
-  $('kDur16Sub').textContent = 'P95 ' + (v16 ? fmtMs(v16.p95) : '—') + (v16 && v16.n < 30 ? ' · ⚠样本不足(n=' + v16.n + ')' : '');
+  $('kDur16Warn').textContent = (v16 && v16.n < 30) ? ' · ⚠样本不足(n=' + v16.n + ')' : '';
   $('kDur48').textContent = v48 ? fmtMs(v48.p50) : '—';
   $('kDur48P95').textContent = v48 ? fmtMs(v48.p95) : '—';
-  $('kDur48Sub').textContent = 'P95 ' + (v48 ? fmtMs(v48.p95) : '—') + (v48 && v48.n < 30 ? ' · ⚠样本不足(n=' + v48.n + ')' : '');
+  $('kDur48Warn').textContent = (v48 && v48.n < 30) ? ' · ⚠样本不足(n=' + v48.n + ')' : '';
   /* speedrun */
   const sp = tm.speedrun || {};
   $('kSpeed').textContent = sp.total ? sp.pct + '%' : '—';
@@ -708,6 +715,7 @@ function renderEngage(times, t) {
       '<span class="val num">' + (v ? fmtMs(v.p50) : '—') + '</span></div>' +
       (v && v.n < 30 ? '<div class="fdrop">⚠ 样本不足(n=' + v.n + ') · P95 ' + fmtMs(v.p95) + '</div>' : '');
   }).join('') + '</div>';
+  } catch (e) { console.error('[dashboard] renderEngage 兜底跳过:', e); }
 }
 /* 补零:填充范围内无事件的日期(仅 ≤90 天),供趋势图和 sparkline 共用 */
 function normalizeDaily(daily) {
