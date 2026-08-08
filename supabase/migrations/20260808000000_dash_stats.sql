@@ -12,8 +12,9 @@
 --   persona      { persona_code: count(*) }         （test_completed 事件数，重测会累加）
 --   countries / daily / versions
 -- 已知审计问题对照:
---   * A: persona 按 count(*)（完成事件数，重测累加）而 funnel 按 count(distinct user_id)
---     → 26 次完成事件 vs 5 个去重完成用户（见审计 A 根因）
+--   * A: persona 原按 count(*)（完成事件数，重测累加）而 funnel 按 count(distinct user_id）
+--     → 26 次完成事件 vs 5 个去重完成用户。【用户批准 A 修复，2026-08-08】已改为每用户取首次结果、
+--     count(distinct user_id)——需同步更新生产函数（见下方『生产同步』）。
 --   * B: speed_ids 用 params.perQuestionMs 单题耗时 <800ms 占比 >70% 判 speedrun；
 --     f_excl_speed=true 时剔除其全部事件 → 生产 468→80（4 个 bot 用户占 83% 事件，数据质量而非阈值）
 -- 注意：用户曾另贴一份无 f_excl_speed 的旧版 dash_stats（dash_stats_block2.sql），仅作历史参考，非当前定义。
@@ -68,12 +69,17 @@ begin
         select event_name, count(distinct user_id) cnt from base group by event_name
       ) s
     ),
-    -- 人格分布(仅完成测试)
+    -- 人格分布(仅完成测试;每用户取首次结果,按去重用户计数——用户批准 A 方案,2026-08-08)
     'persona', (
       select coalesce(jsonb_object_agg(persona_result, cnt), '{}'::jsonb) from (
         select persona_result, count(*) cnt
-        from base_ev
-        where event_name = 'test_completed' and persona_result is not null
+        from (
+          select user_id, persona_result,
+                 row_number() over (partition by user_id order by ts) rn
+          from base_ev
+          where event_name = 'test_completed' and persona_result is not null
+        ) first
+        where rn = 1
         group by persona_result
       ) s
     ),

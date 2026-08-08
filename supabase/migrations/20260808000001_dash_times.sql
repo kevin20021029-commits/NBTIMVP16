@@ -13,9 +13,10 @@
 --   speedrun     { n, total, pct }                       单题<800ms 占比>70% 的用户占比
 --   stages       { landing_to_start: {n,p50,p95}, complete_to_card: {n,p50,p95} }
 -- 已知审计问题对照:
---   * C: stages.n 是【事件对/观测对】数量（landing_to_start = 每个 page_view→test_start 同 user 30 分钟内配对；
+--   * C: stages.n 原为【事件对/观测对】数量（landing_to_start = 每个 page_view→test_start 同 user 30 分钟内配对；
 --     complete_to_card = 每个 test_completed→(share_card_generate_start/deep_dive_expand_click) 配对），
---     不是用户数/完成次数。n=181/105 即配对计数 → UI 当『样本数』展示是语义混淆（见审计 C）。
+--     n=181/105 即配对计数，非用户数/完成次数。【用户批准 C 方向一，2026-08-08】已改为按去重用户计
+--     （一用户一观测）——需同步更新生产函数（见下方『生产同步』）。
 --   * B: speed 判定同 dash_stats（单题<800ms 占比>70%），total 基数=有 test_progress(perQuestionMs) 的用户。
 -- 真定义由用户提供（2026-08-08），原样整合。
 CREATE OR REPLACE FUNCTION dash_times(
@@ -64,23 +65,39 @@ begin
   first_q as (
     select ver, count(distinct user_id) as n1 from perq where q = 1 group by ver
   ),
-  -- 阶段时长:事件时间差(同 user_id 相邻事件,±30 分钟内)
+  -- 阶段时长:按去重用户计(用户批准 C 方向一,2026-08-08)
+  -- landing_to_start:每用户首次 test_start 与其前 30 分钟内最近一次 page_view 的时差(一用户一观测)
+  -- complete_to_card:每用户首次 test_completed 与其后 30 分钟内首个卡片/深读的时差(一用户一观测)
   stage as (
-    select 'landing_to_start' as stage, (e2.ts - e1.ts) as dur
-    from public.events e1
-    join public.events e2 on e2.user_id = e1.user_id
-      and e2.event_name = 'test_start' and e2.ts > e1.ts
-      and e2.ts - e1.ts < interval '30 minutes'
-    where e1.event_name = 'page_view'
-      and e1.ts >= t_from and e1.ts < t_to
+    select 'landing_to_start' as stage, (s.ts - p.ts) as dur
+    from (
+      select user_id, min(ts) as ts
+      from public.events
+      where event_name = 'test_start' and ts >= t_from and ts < t_to
+      group by user_id
+    ) s
+    cross join lateral (
+      select max(e.ts) as ts
+      from public.events e
+      where e.user_id = s.user_id and e.event_name = 'page_view'
+        and e.ts <= s.ts and s.ts - e.ts < interval '30 minutes'
+    ) p
+    where p.ts is not null
     union all
-    select 'complete_to_card' as stage, (e2.ts - e1.ts) as dur
-    from public.events e1
-    join public.events e2 on e2.user_id = e1.user_id
-      and e2.event_name in ('share_card_generate_start','deep_dive_expand_click')
-      and e2.ts > e1.ts and e2.ts - e1.ts < interval '30 minutes'
-    where e1.event_name = 'test_completed'
-      and e1.ts >= t_from and e1.ts < t_to
+    select 'complete_to_card' as stage, (c.ts - t.ts) as dur
+    from (
+      select user_id, min(ts) as ts
+      from public.events
+      where event_name = 'test_completed' and ts >= t_from and ts < t_to
+      group by user_id
+    ) t
+    cross join lateral (
+      select min(e.ts) as ts
+      from public.events e
+      where e.user_id = t.user_id and e.event_name in ('share_card_generate_start','deep_dive_expand_click')
+        and e.ts > t.ts and e.ts - t.ts < interval '30 minutes'
+    ) c
+    where c.ts is not null
   )
   select jsonb_build_object(
     -- 答题总时长分位数(ms),16/48 分开

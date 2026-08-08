@@ -14,6 +14,19 @@ Dashboard 数据管线依赖以下 Supabase RPC（被 `api/stats.js` 调用）�
 
 **用户提供文件存档**：`incoming/dash_stats_block1.sql`（当前 dash_stats，含 speed 过滤，已整合）；`incoming/dash_stats_block2.sql`（无 speed 过滤的旧版 dash_stats，历史参考，未建为函数）；`incoming/dash_times_real.sql`（dash_times，已整合）。
 
+## 生产同步（重要）
+
+迁移文件是**版本控制的预期定义**，但 Supabase 里运行的是独立函数，**改迁移文件不会自动改生产 RPC**。以下改动需同步应用到生产函数（否则生产行为不变）：
+- 2026-08-08 A 修复：dash_stats 的 persona 改为每用户取首次结果 + count(distinct user_id)。
+- 2026-08-08 C 修复：dash_times 的 stage 改为按去重用户计（一用户一观测）。
+
+应用方式（任选其一，需 Supabase 权限）：
+1. **Supabase 控制台** → SQL Editor → 粘贴迁移文件里的完整 `CREATE OR REPLACE FUNCTION` → Run。
+2. **Management API**（`sbp_` 令牌）：`POST /v1/projects/{ref}/database/query`，body `{"query": "<完整 CREATE OR REPLACE FUNCTION SQL>"}`。
+3. **psql/DB 连接串**：执行迁移文件 SQL。
+
+`ref=jxgcnicskcqwzotbeckb`。
+
 ## 如何补全真定义
 
 有 Supabase 访问权限时（Management API 或 psql/service key），用以下方式导出并**替换**对应迁移文件里的占位体：
