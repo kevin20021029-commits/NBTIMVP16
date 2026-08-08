@@ -22,7 +22,10 @@
 --    "versions":{"16-hk":39,"未知":190,"16题版":182,"48题版":1,"16-question":54,"16���":1,"48���":1},
 --    "all_users":37,"countries":{"HK":440,"SG":1,"US":25,"未知":2},"active_users":37,"total_events":468}
 
--- TODO: 占位——真定义待从 Supabase 导出（见 README「如何补全真定义」）。
+-- TODO: 占位——SQL 体待补（见 README「如何补全真定义」）。
+-- 【已实证 2026-08-08】本签名与返回契约已用 service key 直调 REST POST /rpc/dash_stats 验证：
+--   参数名(t_from/t_to/f_country/f_event/f_version/f_excl_speed)与返回 JSON 形状与上文完全一致（生产数据吻合）。
+--   但 REST 无法执行 pg_get_functiondef，SQL 体仍需 Management API(sbp_)/DB 连接/控制台复制。
 -- 已知审计问题（修复前先在此落定真定义，避免改了没保存）:
 --   * funnel test_completed=5 与 persona 求和=26 不一致（完成数口径）
 --   * f_excl_speed=true 时 total_events 468→80（83% 事件被判 speedrun）
