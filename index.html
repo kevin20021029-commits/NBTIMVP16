@@ -415,8 +415,8 @@
   .sc-tagbox { display: flex; flex-direction: column; gap: 14px; padding: 28px 30px; border-radius: 22px;
     background: rgba(255,255,255,.045); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); flex-shrink: 0; }
   .t916 .sc-tagbox { margin: 0 52px; }
-  .sc-tagline { font-size: 36px; font-weight: 700; line-height: 1.45; color: #ffffff; overflow: hidden; }
-  .sc-social { font-size: 27px; line-height: 1.55; color: #98a29b; white-space: pre-line; }
+  .sc-tagline { font-size: 30px; font-weight: 700; line-height: 1.45; color: #ffffff; overflow: hidden; }
+  .sc-social { font-size: 21px; line-height: 1.2; color: #98a29b; white-space: pre-line; }
   .sc-social .sc-num { color: #00e5a0; font-family: 'Arial Narrow', Arial, sans-serif; }
   /* 页脚 */
   .sc-footer { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px;
@@ -5124,6 +5124,25 @@ function bindShareCard(tpl, persona, match, ratio) {
   fitText(tpl.querySelector('.sc-name-main'), 48); /* B6: 标题不折行,超宽自动降字号 */
   tpl.querySelector('.sc-name-sub').textContent = (isEgg ? '' : persona.word);
   tpl.querySelector('.sc-code').textContent = (isEgg ? '' : persona.code); /* G2: 人格代码(RGHC) */
+  /* 溢出修复: RSHC code 42px 后长名(如 hk「一鋪清袋戰神」)致 name-row 折行抬卡高; 预留 code+sub 宽度再缩 name 防折行(与 en 同逻辑) */
+  (function() {
+    var _main = tpl.querySelector('.sc-name-main');
+    var _code = tpl.querySelector('.sc-code');
+    var _sub = tpl.querySelector('.sc-name-sub');
+    var _info = tpl.querySelector('.sc-info');
+    if (!_main || !_code || !_info || !_code.textContent) return;
+    var _baseW = _info.clientWidth;
+    if (!_baseW) return;
+    var _fs = parseFloat(getComputedStyle(_main).fontSize) || 48;
+    var _min = 40;
+    var _gap = 24;
+    var _subW = (_sub && _sub.offsetWidth) ? _sub.offsetWidth : 0;
+    var _codeW = _code.offsetWidth;
+    while (_fs > _min && _main.scrollWidth + _subW + _codeW + _gap * 2 > _baseW - 16) {
+      _fs -= 2;
+      _main.style.fontSize = _fs + 'px';
+    }
+  })();
   /* 四维条:数值→宽度%;MAX/∞→100% 金;MIN→0% 红;高值绿低值红 */
   var data = PERSONA_STAT_BARS[persona.word];
   var stats = tpl.querySelector('.sc-stats');
@@ -5202,7 +5221,7 @@ function bindShareCard(tpl, persona, match, ratio) {
 }
 /* tagline 自动缩字号:3 行起步,>40px 递减,仍溢出则容 4 行 */
 function fitTagline(el, ratio) {
-  var fs = 36; /* G1 */
+  var fs = 30; /* G1+溢出修复: 36→30 省垂直空间 */
   var lines = 3;
   el.style.fontSize = fs + 'px';
   el.style.maxHeight = (lines * fs * 1.45) + 'px';
