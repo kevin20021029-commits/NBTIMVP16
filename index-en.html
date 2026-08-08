@@ -411,8 +411,8 @@
   .sc-tagbox { display: flex; flex-direction: column; gap: 14px; padding: 28px 30px; border-radius: 22px;
     background: rgba(255,255,255,.045); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); flex-shrink: 0; }
   .t916 .sc-tagbox { margin: 0 52px; }
-  .sc-tagline { font-size: 36px; font-weight: 700; line-height: 1.25; color: #ffffff; overflow: hidden; } /* E3 */
-  .sc-social { font-size: 23px; line-height: 1.25; color: #98a29b; white-space: pre-line; } /* E3+RSHC: en 仅 name+code, RSHC 42px 致长名折行, 社会认同 4 行需缩字号防溢出 */
+  .sc-tagline { font-size: 30px; font-weight: 700; line-height: 1.25; color: #ffffff; overflow: hidden; } /* E3+溢出修复: 36→30 */
+  .sc-social { font-size: 21px; line-height: 1.2; color: #98a29b; white-space: pre-line; } /* E3+RSHC+溢出修复: en 仅 name+code, RSHC 42px 致长名折行, 社会认同 4 行需缩字号防溢出 */
   .sc-social .sc-num { color: #00e5a0; font-family: 'Arial Narrow', Arial, sans-serif; }
   /* 页脚 */
   .sc-footer { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px;
@@ -5206,7 +5206,7 @@ function bindShareCard(tpl, persona, match, ratio) {
 }
 /* tagline 自动缩字号:3 行起步,>40px 递减,仍溢出则容 4 行 */
 function fitTagline(el, ratio) {
-  var fs = 36; /* G1 */
+  var fs = 30; /* G1+溢出修复: 36→30 省垂直空间 */
   var lines = 3;
   el.style.fontSize = fs + 'px';
   el.style.maxHeight = (lines * fs * 1.45) + 'px';
