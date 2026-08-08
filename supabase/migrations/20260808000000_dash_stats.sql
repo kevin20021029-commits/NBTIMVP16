@@ -32,7 +32,17 @@ AS $$
 declare
   r jsonb;
 begin
-  with speed_ids as (
+  with bot_ids as (
+    -- B1: 统计层排除 4 个已识别 bot 用户(2026-08-08, 用户批准, 可回退:删除本 CTE 即恢复)
+    -- 识别依据:test_progress 单题耗时 <800ms 占比 >70%(与 speed_ids 同判定)
+    select unnest(array[
+      '64972fec-8c96-43b0-80a1-8572fb169167',
+      '3c3557ac-ade2-4189-9edf-e8cd0359c3d6',
+      'e2f509c5-47e9-426f-bf7e-eb07b2878267',
+      'd304cf41-7e5b-4780-a9d9-90793221f9e6'
+    ]::text[]) as uid
+  ),
+  speed_ids as (
     -- speedrun 定义:test_progress 中单题耗时 <800ms 占比 >70% 的用户
     select user_id from (
       select user_id,
@@ -52,6 +62,7 @@ begin
       and (f_country is null or country = f_country)
       and (f_version is null or test_version = f_version)
       and (not f_excl_speed or user_id not in (select user_id from speed_ids))
+      and user_id not in (select uid from bot_ids)
   ),
   base_ev as (
     select * from base
@@ -61,7 +72,7 @@ begin
     -- KPI:范围内行为数 / 范围内活跃用户 / 全时总用户
     'total_events', (select count(*) from base_ev),
     'active_users', (select count(distinct user_id) from base_ev),
-    'all_users',    (select count(distinct user_id) from public.events),
+    'all_users',    (select count(distinct user_id) from public.events where user_id not in (select uid from bot_ids)),
     -- 漏斗:始终按全事件统计(不受行为过滤影响);按去重用户计数,
     -- 避免一人多次生成分享卡导致漏斗级数不递减(如 >100% 转化)
     'funnel', (

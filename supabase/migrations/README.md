@@ -14,6 +14,18 @@ Dashboard 数据管线依赖以下 Supabase RPC（被 `api/stats.js` 调用）�
 
 **用户提供文件存档**：`incoming/dash_stats_block1.sql`（当前 dash_stats，含 speed 过滤，已整合）；`incoming/dash_stats_block2.sql`（无 speed 过滤的旧版 dash_stats，历史参考，未建为函数）；`incoming/dash_times_real.sql`（dash_times，已整合）。
 
+## B1：统计层排除 4 个 bot 用户（2026-08-08，用户批准）
+
+两个迁移文件头部加入 `bot_ids` CTE，排除以下 4 个已识别 bot 用户（判定：test_progress 单题耗时 <800ms 占比 >70%，与 speed_ids 同口径）：
+- `64972fec-8c96-43b0-80a1-8572fb169167`（08-07 45 事件）
+- `3c3557ac-ade2-4189-9edf-e8cd0359c3d6`（08-07 300 事件）
+- `e2f509c5-47e9-426f-bf7e-eb07b2878267`（08-08 35 事件）
+- `d304cf41-7e5b-4780-a9d9-90793221f9e6`（08-08 20 事件，仍在持续）
+
+**机制理由**：统计层（RPC 聚合）排除，与 B2 入口层拦截相互独立。选 SQL 层而非 dashboard 侧过滤：①搭 A/C 生产同步一次到位；②聚合层统一排除（漏斗/人格/日趋势/时长全口径一致）；③dashboard 侧无法过滤已聚合的 API 响应。
+**可回退性**：纯附加 WHERE 过滤，不删不改任何数据；删除 `bot_ids` CTE 即恢复。与 B2（入口层拦截）相互独立、可单独回退。
+**影响**：4 个 bot 贡献了约 400 条事件（总 500 中的 80%），且是全部 test_progress 发送者 → 排除后 16题版 答题时长/单题耗时/speedrun 卡将显示空/—（真实用户尚无 test_duration 数据），待真实用户完成后填充。
+
 ## 生产同步（重要）
 
 迁移文件是**版本控制的预期定义**，但 Supabase 里运行的是独立函数，**改迁移文件不会自动改生产 RPC**。以下改动需同步应用到生产函数（否则生产行为不变）：

@@ -33,7 +33,16 @@ AS $$
 declare
   r jsonb;
 begin
-  with tp as (
+  with bot_ids as (
+    -- B1: 统计层排除 4 个已识别 bot 用户(2026-08-08, 用户批准, 可回退:删除本 CTE 即恢复)
+    select unnest(array[
+      '64972fec-8c96-43b0-80a1-8572fb169167',
+      '3c3557ac-ade2-4189-9edf-e8cd0359c3d6',
+      'e2f509c5-47e9-426f-bf7e-eb07b2878267',
+      'd304cf41-7e5b-4780-a9d9-90793221f9e6'
+    ]::text[]) as uid
+  ),
+  tp as (
     select e.id, e.user_id, e.ts, e.params, e.country, e.lang,
            case when jsonb_array_length(e.params->'perQuestionMs') >= 40 then '48题版' else '16题版' end as ver,
            coalesce(e.params->>'uaBucket', 'unknown') as ua_bucket,
@@ -41,6 +50,7 @@ begin
     from public.events e
     where e.event_name = 'test_progress'
       and e.ts >= t_from and e.ts < t_to
+      and e.user_id not in (select uid from bot_ids)
       and (f_version is null or
            case when jsonb_array_length(e.params->'perQuestionMs') >= 40 then '48题版' else '16题版' end = f_version)
       and (f_lang is null or e.lang = f_lang)
@@ -74,6 +84,7 @@ begin
       select user_id, min(ts) as ts
       from public.events
       where event_name = 'test_start' and ts >= t_from and ts < t_to
+        and user_id not in (select uid from bot_ids)
       group by user_id
     ) s
     cross join lateral (
@@ -89,6 +100,7 @@ begin
       select user_id, min(ts) as ts
       from public.events
       where event_name = 'test_completed' and ts >= t_from and ts < t_to
+        and user_id not in (select uid from bot_ids)
       group by user_id
     ) t
     cross join lateral (
