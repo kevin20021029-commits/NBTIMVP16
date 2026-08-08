@@ -773,8 +773,9 @@ function renderFunnel(funnel) {
     const drop = (prevV != null && prevV > 0) ? (1 - r.value / prevV) : null;
     const rate = (prevV != null && prevV > 0) ? r.value / prevV : null;
     const dropHtml = (prevV != null)
-      ? '<div class="fdrop">↓ <b>' + (rate != null ? (rate * 100).toFixed(0) : 0) + '%</b> 较上一步' +
-        (drop != null && drop > 0 ? '<em>流失 ' + fmt(prevV - r.value) + '</em>' : '') + '</div>'
+      ? (drop != null && drop > 0
+          ? '<div class="fdrop">↓ <b>' + (drop * 100).toFixed(0) + '%</b> 较上一步 · 流失 ' + fmt(prevV - r.value) + '</div>'
+          : '<div class="fdrop">↔ 留存 <b>' + (rate != null ? (rate * 100).toFixed(0) : 100) + '%</b></div>')
       : '';
     return '<div class="fstep">' +
       '<div class="fmeta"><span>' + esc(r.name) + '</span><b class="num">' + fmt(r.value) + ' 人</b></div>' +
