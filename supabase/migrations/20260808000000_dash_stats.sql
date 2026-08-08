@@ -6,30 +6,17 @@
 --   f_event     text          事件过滤，NULL=全部
 --   f_version   text          版本过滤，NULL=全部
 --   f_excl_speed boolean      排除 speedrun 用户（true 时剔除其全部事件）
--- 返回 JSON（2026-08-08 生产实测示例）:
---   daily        [{ day, users, events }]           按日（Asia/Shanghai 分日）
---   funnel       { event_name: count, ... }          各事件名计数（参与度 tab 用其子集；UI 按「人」语义展示）
---   persona      { persona_code: count, ... }        人格分布（16 型）
---   versions     { test_version: count, ... }        test_version 分布（NULL 标「未知」）
---   all_users    int                                  累计去重用户
---   countries    { country: count, ... }             地区分布
---   active_users int                                 区间去重活跃用户
---   total_events int                                 区间事件总数
--- 示例:
---   {"daily":[{"day":"2026-08-07","users":20,"events":369},{"day":"2026-08-08","users":18,"events":99}],
---    "funnel":{"page_view":35,"test_start":5,"test_completed":5,"share_card_generate_success":5,"deep_dive_expand_click":4,...},
---    "persona":{"FGHC":4,"FGHP":2,...,"RGTC":8,...},
---    "versions":{"16-hk":39,"未知":190,"16题版":182,"48题版":1,"16-question":54,"16���":1,"48���":1},
---    "all_users":37,"countries":{"HK":440,"SG":1,"US":25,"未知":2},"active_users":37,"total_events":468}
-
--- TODO: 占位——SQL 体待补（见 README「如何补全真定义」）。
--- 【已实证 2026-08-08】本签名与返回契约已用 service key 直调 REST POST /rpc/dash_stats 验证：
---   参数名(t_from/t_to/f_country/f_event/f_version/f_excl_speed)与返回 JSON 形状与上文完全一致（生产数据吻合）。
---   但 REST 无法执行 pg_get_functiondef，SQL 体仍需 Management API(sbp_)/DB 连接/控制台复制。
--- 已知审计问题（修复前先在此落定真定义，避免改了没保存）:
---   * funnel test_completed=5 与 persona 求和=26 不一致（完成数口径）
---   * f_excl_speed=true 时 total_events 468→80（83% 事件被判 speedrun）
---   * versions 含乱码 16���/48���（入库编码，见 dashboard 审计 I1）
+-- 返回 JSON（契约已用 service key 直调 REST 实证，2026-08-08）:
+--   total_events / active_users / all_users
+--   funnel       { event_name: 去重 user_id 数 }   （按去重用户计数）
+--   persona      { persona_code: count(*) }         （test_completed 事件数，重测会累加）
+--   countries / daily / versions
+-- 已知审计问题对照:
+--   * A: persona 按 count(*)（完成事件数，重测累加）而 funnel 按 count(distinct user_id)
+--     → 26 次完成事件 vs 5 个去重完成用户（见审计 A 根因）
+--   * B: speed_ids 用 params.perQuestionMs 单题耗时 <800ms 占比 >70% 判 speedrun；
+--     f_excl_speed=true 时剔除其全部事件 → 生产 468→80（4 个 bot 用户占 83% 事件，数据质量而非阈值）
+-- 注意：用户曾另贴一份无 f_excl_speed 的旧版 dash_stats（dash_stats_block2.sql），仅作历史参考，非当前定义。
 CREATE OR REPLACE FUNCTION dash_stats(
   t_from timestamptz,
   t_to timestamptz,
@@ -41,8 +28,79 @@ CREATE OR REPLACE FUNCTION dash_stats(
 RETURNS json
 LANGUAGE plpgsql
 AS $$
-BEGIN
-  -- TODO: 待补真定义
-  RETURN NULL;
-END;
+declare
+  r jsonb;
+begin
+  with speed_ids as (
+    -- speedrun 定义:test_progress 中单题耗时 <800ms 占比 >70% 的用户
+    select user_id from (
+      select user_id,
+        (count(*) filter (where (x.value)::numeric < 800))::float / count(*) as fast_ratio
+      from public.events e
+        cross join lateral jsonb_array_elements_text(e.params->'perQuestionMs') x
+      where e.event_name = 'test_progress'
+        and e.ts >= t_from and e.ts < t_to
+        and coalesce((e.params->>'isDiag')::boolean, false) = false
+      group by user_id
+    ) s
+    where fast_ratio > 0.7
+  ),
+  base as (
+    select * from public.events
+    where ts >= t_from and ts < t_to
+      and (f_country is null or country = f_country)
+      and (f_version is null or test_version = f_version)
+      and (not f_excl_speed or user_id not in (select user_id from speed_ids))
+  ),
+  base_ev as (
+    select * from base
+    where (f_event is null or event_name = f_event)
+  )
+  select jsonb_build_object(
+    -- KPI:范围内行为数 / 范围内活跃用户 / 全时总用户
+    'total_events', (select count(*) from base_ev),
+    'active_users', (select count(distinct user_id) from base_ev),
+    'all_users',    (select count(distinct user_id) from public.events),
+    -- 漏斗:始终按全事件统计(不受行为过滤影响);按去重用户计数,
+    -- 避免一人多次生成分享卡导致漏斗级数不递减(如 >100% 转化)
+    'funnel', (
+      select coalesce(jsonb_object_agg(event_name, cnt), '{}'::jsonb) from (
+        select event_name, count(distinct user_id) cnt from base group by event_name
+      ) s
+    ),
+    -- 人格分布(仅完成测试)
+    'persona', (
+      select coalesce(jsonb_object_agg(persona_result, cnt), '{}'::jsonb) from (
+        select persona_result, count(*) cnt
+        from base_ev
+        where event_name = 'test_completed' and persona_result is not null
+        group by persona_result
+      ) s
+    ),
+    -- 地区分布
+    'countries', (
+      select coalesce(jsonb_object_agg(c, cnt), '{}'::jsonb) from (
+        select coalesce(nullif(country, ''), '未知') c, count(*) cnt
+        from base_ev group by 1
+      ) s
+    ),
+    -- 日趋势(Asia/Shanghai 时区)
+    'daily', (
+      select coalesce(jsonb_agg(d order by d.day), '[]'::jsonb) from (
+        select to_char(date_trunc('day', ts at time zone 'Asia/Shanghai'), 'YYYY-MM-DD') as "day",
+               count(*) events,
+               count(distinct user_id) users
+        from base_ev group by 1
+      ) d
+    ),
+    -- 版本分布(16/48)
+    'versions', (
+      select coalesce(jsonb_object_agg(v, cnt), '{}'::jsonb) from (
+        select coalesce(nullif(test_version, ''), '未知') v, count(*) cnt
+        from base_ev group by 1
+      ) s
+    )
+  ) into r;
+  return r;
+end;
 $$;

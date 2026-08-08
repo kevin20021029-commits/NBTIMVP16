@@ -19,10 +19,10 @@
 --    "total_ms":{"16题版":{"n":4,"p25":9153.5,"p50":10067.5,"p75":24996.75,"p95":60067.35}},
 --    "per_question":[{"n":4,"q":1,"p50":575,"ver":"16题版","drop_pct":0},...]}
 
--- TODO: 占位——SQL 体待补（见 README「如何补全真定义」）。
+-- TODO: 占位——SQL 体仍未获得（2026-08-08 用户贴的 SQL 是两个 dash_stats 版本，非 dash_times）。
 -- 【已实证 2026-08-08】本签名与返回契约已用 service key 直调 REST POST /rpc/dash_times 验证：
 --   参数名(t_from/t_to/f_version/f_lang/f_country/f_ua)与返回 JSON 形状与上文完全一致（生产数据吻合）。
---   但 REST 无法执行 pg_get_functiondef，SQL 体仍需 Management API(sbp_)/DB 连接/控制台复制。
+--   补齐仍需：用户控制台复制 dash_times 定义，或 Management API PAT(sbp_) 跑 pg_get_functiondef。
 -- 已知审计问题（修复前先在此落定真定义，避免改了没保存）:
 --   * stages.n=181/105 与任何计数口径对不上（疑似按会话/观测对计数，UI 当样本数展示）
 --   * speedrun.total=4 但 dash_stats f_excl_speed 移除 83% 事件（判定口径不一致）
